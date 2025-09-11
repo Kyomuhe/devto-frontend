@@ -41,7 +41,6 @@ const LeftSidebar = () => {
 
       {/* Navigation Links Card */}
       <div className="overflow-hidden">
-        {/* Main Links */}
         <div className="p-4 space-y-2">
           <NavLink icon={<Smile className="w-5 h-5 text-yellow-500" />} text="About" />
           <NavLink icon={<Phone className="w-5 h-5 text-orange-500" />} text="Contact" />

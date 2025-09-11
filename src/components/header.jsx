@@ -42,7 +42,6 @@ const Header = () => {
             </div>
           </div>
 
-          {/* Right side - Desktop */}
           <div className="hidden md:flex items-center space-x-4">
             <button className="text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200">
               Log in
