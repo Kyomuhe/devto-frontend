@@ -18,12 +18,12 @@ const BuildProfile = ({ onContinue, currentStep = 1, totalSteps = 5 }) => {
   };
 
   const handleContinue = () => {
-    // Pass user data to parent component
+    // Passing user data to parent component
     onContinue(userData);
   };
 
   const handleImageEdit = () => {
-    // Handle profile image editing
+    // Handling profile image editing
     console.log('Edit profile image clicked');
   };
 

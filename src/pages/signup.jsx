@@ -13,7 +13,7 @@ const SignupPage = () => {
   ];
 
   const handleSocialSignup = (provider) => {
-    // Handle social signup logic here
+    //social signup logic will be handled here
     console.log('Signup with:', provider);
   };
 
@@ -50,7 +50,6 @@ const SignupPage = () => {
         {button.text}
       </span>
 
-      {/* Empty spacer to balance flex */}
       <span className="w-5" />
     </button>
   ))}
