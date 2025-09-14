@@ -4,7 +4,7 @@ import SideMenu from '../components/sideMenu';
 import sampleMenuItems from '../data/sampleData';
 import LeftSidebar from '../sections/LeftSidebar';
 import RightSidebar from '../sections/RightSidebar';
-import CenterContent from '../sections/CenterContent';
+import CenterContent from '../sections/Posts';
 
 const Main = () => {
   return (

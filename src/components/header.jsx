@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Search,Menu, X } from 'lucide-react';
 import logo from '../assets/logo.webp';
+import { useNavigate } from "react-router-dom";
+
 
 const Header = () => {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -43,10 +46,14 @@ const Header = () => {
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
-            <button className="text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200">
+            <button
+            onClick={() => navigate("/login")} 
+            className="text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200">
               Log in
             </button>
-            <button className="border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+            <button
+            onClick ={() => navigate("/signup")} 
+            className="border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
               Create account
             </button>
           </div>
@@ -90,11 +97,15 @@ const Header = () => {
               </div>
             </div>
             
-            <button className="w-full text-left px-3 py-2 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-md transition-colors duration-200">
+            <button
+            onClick={() => navigate("/login")}
+            className="w-full text-left px-3 py-2 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-md transition-colors duration-200">
               Log in
             </button>
             
-            <button className="w-full text-left px-3 py-2 border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white rounded-md transition-colors duration-200">
+            <button 
+            onClick ={() => navigate("/signup")}
+            className="w-full text-left px-3 py-2 border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white rounded-md transition-colors duration-200">
               Create account
             </button>
           </div>

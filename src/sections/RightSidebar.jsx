@@ -1,5 +1,5 @@
 import React from 'react';
-import { Hand, MoreHorizontal, Rocket } from 'lucide-react';
+import { Hand, Rocket } from 'lucide-react';
 import google from '../assets/google.webp';
 
 const RightSidebar = () => {
