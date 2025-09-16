@@ -3,6 +3,7 @@ import { Search, Menu, X, Bell } from 'lucide-react';
 import logo from '../assets/logo.webp';
 import { useNavigate } from "react-router-dom";
 import ProfileModal from '../models/profileModel';
+import defaultAvator from '../assets/default.png';
 
 const HeaderLoggedin = ({ user,handleLogout }) => {
   const navigate = useNavigate();
@@ -73,12 +74,13 @@ const HeaderLoggedin = ({ user,handleLogout }) => {
 
             {/* Profile Avatar + Modal */}
             <div ref={profileRef} className="relative">
-              <img
-                src="/assets/profile1.jpeg"
-                alt="User Avatar"
-                className="w-8 h-8 rounded-full cursor-pointer"
-                onClick={toggleProfile}
-              />
+<img
+  src={user?.id ? `http://localhost:8081/api/auth/user/${user.id}/profile-image` : defaultAvator}
+  alt="User Avatar"
+  className="w-8 h-8 rounded-full cursor-pointer"
+  onClick={toggleProfile}
+  onError={(e) => { e.target.src = defaultAvator; }}
+/>
               <ProfileModal
                 open={isProfileOpen}
                 onClose={() => setIsProfileOpen(false)}

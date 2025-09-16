@@ -50,7 +50,7 @@ useEffect(() => {
   const handleLogin = (loginResult) => {
     console.log('Login successful:', loginResult);
     setUserToken(loginResult.token);
-    setUser(loginResult.user);   // store user details
+    setUser(loginResult.user);   
     setIsAuthenticated(true);
     navigate('/main-loggedin');
   };

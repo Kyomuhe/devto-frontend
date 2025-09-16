@@ -74,33 +74,33 @@ const EmailSignup = ({onSignupSuccess }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const signupUser = async (userData) => {
-    try {
-      const response = await fetch('http://localhost:8081/api/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: userData.username,
-          email: userData.email,
-          password: userData.password,
-          name: userData.name
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Signup failed');
-      }
-
-      return data;
-    } catch (error) {
-      throw new Error(error.message || 'Network error occurred');
+const signupUser = async (userData) => {
+  try {
+    const formData = new FormData();
+    formData.append('username', userData.username);
+    formData.append('email', userData.email);
+    formData.append('password', userData.password);
+    formData.append('name', userData.name);
+    if (userData.profileImage) {
+      formData.append('profileImage', userData.profileImage);
     }
-  };
 
+    const response = await fetch('http://localhost:8081/api/auth/signup-with-image', {
+      method: 'POST',
+      body: formData, // No need for headers, browser sets them for FormData
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Signup failed');
+    }
+
+    return data;
+  } catch (error) {
+    throw new Error(error.message || 'Network error occurred');
+  }
+};
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -173,9 +173,6 @@ const EmailSignup = ({onSignupSuccess }) => {
                 {formData.profileImage ? formData.profileImage.name : 'No file selected.'}
               </span>
             </div>
-            <p className="mt-1 text-xs text-gray-500">
-              Note: Profile image upload will be implemented in a future update
-            </p>
           </div>
 
           <div>
