@@ -2,15 +2,37 @@ import React, { useState } from 'react';
 import { Apple, Facebook, Github, Chrome, Twitter } from 'lucide-react';
 import logo from '../assets/logo.webp';
 
-const LoginPage = () => {
-  const [email, setEmail] = useState('');
+const LoginPage = ({ onLoginSuccess }) => {
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic will be handled here
-    console.log('Login attempt:', { email, password, rememberMe });
+    setError('');
+
+    try {
+      const response = await fetch('http://localhost:8081/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: username,
+          password: password
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem('authToken', data.token);
+        onLoginSuccess(data);
+      } else {
+        setError(data.error || 'Login failed. Please check your credentials.');
+      }
+    } catch (err) {
+      setError('Something went wrong. Please try again.');
+    }
   };
 
   const socialButtons = [
@@ -26,41 +48,36 @@ const LoginPage = () => {
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
-          <div>
-            <img
-              className="mx-auto h-12 w-auto"
-              src= {logo}
-              alt="DEV Community Logo"
-            />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Join the DEV Community
-          </h1>
-          <p className="text-gray-600">
-            DEV Community is a community of 3,465,300 amazing developers
-          </p>
+          <img className="mx-auto h-12 w-auto" src={logo} alt="DEV Community Logo" />
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
+          <p className="text-gray-600">Sign in with your username</p>
         </div>
 
-        {/* Social Login Buttons */}
-<div className="space-y-3">
-  {socialButtons.map((button, index) => (
-    <button
-      key={index}
-      className="w-full flex items-center justify-between px-4 py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-blue-50 transition-colors duration-200"
-    >
-      <button.icon className={`w-5 h-5 ${button.color}`} />
+        {/* Show error */}
+        {error && (
+          <div className="text-red-600 text-sm font-medium text-center">
+            {error}
+          </div>
+        )}
 
-      <span className="absolute text-black left-1/2 transform -translate-x-1/2">
-        {button.text}
-      </span>
+        {/* Social Login */}
+        <div className="space-y-3">
+          {socialButtons.map((button, index) => (
+            <button
+              key={index}
+              type="button"
+              className="w-full flex items-center justify-between px-4 py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-blue-50 transition-colors duration-200"
+            >
+              <button.icon className={`w-5 h-5 ${button.color}`} />
+              <span className="absolute text-black left-1/2 transform -translate-x-1/2">
+                {button.text}
+              </span>
+              <span className="w-5" />
+            </button>
+          ))}
+        </div>
 
-      {/* Empty spacer to balance flex */}
-      <span className="w-5" />
-    </button>
-  ))}
-</div>
-
-        {/* OR Divider */}
+        {/* Divider */}
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-gray-300" />
@@ -70,21 +87,20 @@ const LoginPage = () => {
           </div>
         </div>
 
-        {/* Email/Password Form */}
+        {/* Login form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-              Email
+            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+              Username
             </label>
             <input
-              id="email"
-              name="email"
-              type="email"
+              id="username"
+              type="text"
               required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-3 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter your email"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter your username"
             />
           </div>
 
@@ -94,12 +110,11 @@ const LoginPage = () => {
             </label>
             <input
               id="password"
-              name="password"
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-3 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Enter your password"
             />
           </div>
@@ -108,7 +123,6 @@ const LoginPage = () => {
             <div className="flex items-center">
               <input
                 id="remember-me"
-                name="remember-me"
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
@@ -118,47 +132,18 @@ const LoginPage = () => {
                 Remember me
               </label>
             </div>
-            <div>
-              <a href="#" className="text-sm text-blue-600 hover:text-blue-500">
-                Forgot password?
-              </a>
-            </div>
+            <a href="#" className="text-sm text-blue-600 hover:text-blue-500">
+              Forgot password?
+            </a>
           </div>
 
-          <div>
-            <button
-              type="submit"
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-            >
-              Log in
-            </button>
-          </div>
+          <button
+            type="submit"
+            className="w-full flex justify-center py-3 px-4 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Log in
+          </button>
         </form>
-
-        {/* Footer */}
-        <div className="text-center space-y-4">
-          <p className="text-xs text-gray-500 leading-relaxed">
-            By signing in, you are agreeing to our{' '}
-            <a href="#" className="text-blue-600 hover:text-blue-500">
-              privacy policy
-            </a>
-            ,{' '}
-            <a href="#" className="text-blue-600 hover:text-blue-500">
-              terms of use
-            </a>
-            {' '}and{' '}
-            <a href="#" className="text-blue-600 hover:text-blue-500">
-              code of conduct
-            </a>
-            .
-          </p>
-          <p className="text-sm text-gray-600">
-            New to DEV Community?{' '}
-            <a href="#" className="text-blue-600 hover:text-blue-500 font-medium">
-              Create account.
-            </a>
-          </p>
-        </div>
       </div>
     </div>
   );

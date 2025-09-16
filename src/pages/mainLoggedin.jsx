@@ -7,14 +7,22 @@ import RightSidebar from '../sections/RightSidebar';
 import OnBoard from '../components/onBoard';
 import ActiveDiscussions from '../components/activeDisscussions';
 
-const MainLoggedin = () => {
+const MainLoggedin = ({ onLogout, userToken, user }) => {
   
   return (
     <div className="min-h-screen bg-gray-50">
-      <SideMenu menuItems={sampleMenuItems} />
+      <SideMenu 
+        menuItems={sampleMenuItems} 
+        onLogout={onLogout}
+      />
       
       <div className="ml-16">
-        <HeaderLoggedin />
+        <HeaderLoggedin 
+          handleLogout={onLogout}
+          userToken={userToken}
+          user={user}   
+
+        />
         
         <div className="flex">
           <LeftSidebar />
@@ -25,8 +33,6 @@ const MainLoggedin = () => {
             <ActiveDiscussions />
             <RightSidebar />
           </div>
-    
-
         </div>
       </div>
     </div>

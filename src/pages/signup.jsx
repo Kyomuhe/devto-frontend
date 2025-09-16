@@ -1,21 +1,28 @@
 import React from 'react';
 import { Apple, Facebook, Github, Chrome, Twitter, Mail } from 'lucide-react';
 import logo from '../assets/logo.webp';
+import { useNavigate } from "react-router-dom";
+
 
 const SignupPage = () => {
+  const navigate = useNavigate();
   const socialButtons = [
     { icon: Apple, text: 'Sign up with Apple', color: 'text-gray-800' },
     { icon: Facebook, text: 'Sign up with Facebook', color: 'text-blue-600' },
     { icon: Github, text: 'Sign up with GitHub', color: 'text-gray-800' },
     { icon: Chrome, text: 'Sign up with Google', color: 'text-gray-600' },
     { icon: Twitter, text: 'Sign up with Twitter (X)', color: 'text-gray-800' },
-    { icon: Mail, text: 'Sign up with Email', color: 'text-gray-800' }
+    { icon: Mail, text: 'Sign up with Email', color: 'text-gray-800', route: '/email-signup' }
   ];
 
-  const handleSocialSignup = (provider) => {
-    //social signup logic will be handled here
-    console.log('Signup with:', provider);
+  const handleSocialSignup = (button) => {
+    if (button.route) {
+      navigate(button.route); 
+    } else {
+      console.log('Signup with:', button.text);
+    }
   };
+  
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -39,11 +46,11 @@ const SignupPage = () => {
         {/* Social Signup Buttons */}
 <div className="space-y-3">
   {socialButtons.map((button, index) => (
-    <button
-      key={index}
-      onClick={() => handleSocialSignup(button.text)}
-      className="w-full flex items-center justify-between px-4 py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-blue-50 transition-colors duration-200"
-    >
+            <button
+              key={index}
+              onClick={() => handleSocialSignup(button)}
+              className="relative w-full flex items-center justify-between px-4 py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-blue-50 transition-colors duration-200"
+            >
       <button.icon className={`w-5 h-5 ${button.color}`} />
 
       <span className="absolute text-black left-1/2 transform -translate-x-1/2">

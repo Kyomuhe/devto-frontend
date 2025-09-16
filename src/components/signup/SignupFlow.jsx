@@ -4,7 +4,7 @@ import InterestsSelection from './InterestsSelection';
 import SpecialInitiatives from './SpecialInitiatives';
 import NewsletterSubscription from './NewsletterSubscription';
 
-const SignupFlow = () => {
+const SignupFlow = ({ onSignupFlowComplete }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [signupData, setSignupData] = useState({
     profile: {},
@@ -40,19 +40,20 @@ const SignupFlow = () => {
   };
 
   const handleNewsletterFinish = (newsletterData) => {
-    setSignupData(prev => ({
-      ...prev,
-      newsletter: newsletterData
-    }));
-    
-    // Complete signup process
-    console.log('Signup completed with data:', {
+    const finalSignupData = {
       ...signupData,
       newsletter: newsletterData
-    });
+    };
     
-    // Redirect to main app or show success message
-    alert('Signup completed successfully!');
+    setSignupData(finalSignupData);
+    
+    // Complete signup process
+    console.log('Signup flow completed with data:', finalSignupData);
+    
+    // navigating to main
+    if (onSignupFlowComplete) {
+      onSignupFlowComplete(finalSignupData);
+    }
   };
 
   const handleBack = () => {

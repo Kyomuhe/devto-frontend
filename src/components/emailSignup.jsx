@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
-const EmailSignup = ({ onSubmit }) => {
+const EmailSignup = ({onSignupSuccess }) => {
   const [formData, setFormData] = useState({
     profileImage: null,
     name: '',
@@ -12,6 +12,7 @@ const EmailSignup = ({ onSubmit }) => {
 
   const [errors, setErrors] = useState({});
   const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -73,10 +74,60 @@ const EmailSignup = ({ onSubmit }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const signupUser = async (userData) => {
+    try {
+      const response = await fetch('http://localhost:8081/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: userData.username,
+          email: userData.email,
+          password: userData.password,
+          name: userData.name
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Signup failed');
+      }
+
+      return data;
+    } catch (error) {
+      throw new Error(error.message || 'Network error occurred');
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      onSubmit(formData);
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsLoading(true);
+    setErrors({});
+
+    try {
+      const result = await signupUser(formData);
+      
+      // Storing the JWT token in localStorage
+      localStorage.setItem('authToken', result.token);
+      
+      //  triggers navigation to SignupFlow
+      if (onSignupSuccess) {
+        onSignupSuccess(result);
+      }
+      
+    } catch (error) {
+      setErrors({
+        submit: error.message
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -90,6 +141,13 @@ const EmailSignup = ({ onSubmit }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Show general error message */}
+          {errors.submit && (
+            <div className="bg-red-50 border border-red-200 rounded-md p-4">
+              <p className="text-sm text-red-600">{errors.submit}</p>
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Profile image
@@ -101,10 +159,13 @@ const EmailSignup = ({ onSubmit }) => {
                 onChange={handleFileChange}
                 className="hidden"
                 id="profile-image"
+                disabled={isLoading}
               />
               <label
                 htmlFor="profile-image"
-                className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded cursor-pointer transition-colors duration-200"
+                className={`bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded cursor-pointer transition-colors duration-200 ${
+                  isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
                 Browse...
               </label>
@@ -112,6 +173,9 @@ const EmailSignup = ({ onSubmit }) => {
                 {formData.profileImage ? formData.profileImage.name : 'No file selected.'}
               </span>
             </div>
+            <p className="mt-1 text-xs text-gray-500">
+              Note: Profile image upload will be implemented in a future update
+            </p>
           </div>
 
           <div>
@@ -122,9 +186,10 @@ const EmailSignup = ({ onSubmit }) => {
               type="text"
               value={formData.name}
               onChange={(e) => handleInputChange('name', e.target.value)}
+              disabled={isLoading}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 errors.name ? 'border-red-500' : 'border-gray-300'
-              }`}
+              } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
             />
             {errors.name && (
               <p className="mt-1 text-sm text-red-600">{errors.name}</p>
@@ -139,9 +204,10 @@ const EmailSignup = ({ onSubmit }) => {
               type="text"
               value={formData.username}
               onChange={(e) => handleInputChange('username', e.target.value)}
+              disabled={isLoading}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 errors.username ? 'border-red-500' : 'border-gray-300'
-              }`}
+              } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
             />
             {errors.username && (
               <p className="mt-1 text-sm text-red-600">{errors.username}</p>
@@ -156,9 +222,10 @@ const EmailSignup = ({ onSubmit }) => {
               type="email"
               value={formData.email}
               onChange={(e) => handleInputChange('email', e.target.value)}
+              disabled={isLoading}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 errors.email ? 'border-red-500' : 'border-gray-300'
-              }`}
+              } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
             />
             {errors.email && (
               <p className="mt-1 text-sm text-red-600">{errors.email}</p>
@@ -173,9 +240,10 @@ const EmailSignup = ({ onSubmit }) => {
               type="password"
               value={formData.password}
               onChange={(e) => handleInputChange('password', e.target.value)}
+              disabled={isLoading}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 errors.password ? 'border-red-500' : 'border-gray-300'
-              }`}
+              } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
             />
             {errors.password && (
               <p className="mt-1 text-sm text-red-600">{errors.password}</p>
@@ -190,9 +258,10 @@ const EmailSignup = ({ onSubmit }) => {
               type="password"
               value={formData.passwordConfirmation}
               onChange={(e) => handleInputChange('passwordConfirmation', e.target.value)}
+              disabled={isLoading}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 errors.passwordConfirmation ? 'border-red-500' : 'border-gray-300'
-              }`}
+              } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
             />
             {errors.passwordConfirmation && (
               <p className="mt-1 text-sm text-red-600">{errors.passwordConfirmation}</p>
@@ -206,6 +275,7 @@ const EmailSignup = ({ onSubmit }) => {
                   type="checkbox"
                   checked={captchaVerified}
                   onChange={(e) => setCaptchaVerified(e.target.checked)}
+                  disabled={isLoading}
                   className="w-6 h-6 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                 />
                 <div className="flex-1">
@@ -225,9 +295,12 @@ const EmailSignup = ({ onSubmit }) => {
           <div>
             <button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              disabled={isLoading}
+              className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                isLoading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
-              Create Account
+              {isLoading ? 'Creating Account...' : 'Create Account'}
             </button>
           </div>
         </form>
