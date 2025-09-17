@@ -1,12 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MoreHorizontal, X } from 'lucide-react';
-import samplePosts from '../data/samplePosts';
 import PostCard from '../components/PostCard';
 import center from '../assets/center.webp';
 
 const CenterContent = () => {
   const [activeTab, setActiveTab] = useState('relevant');
   const [showLiveEvent, setShowLiveEvent] = useState(true);
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    // Fetch posts from your backend API
+    fetch('http://localhost:8081/posts/display')
+      .then(res => res.json())
+      .then(data => setPosts(data))
+      .catch(err => console.error('Failed to fetch posts:', err));
+  }, []);
 
   const tabs = [
     { id: 'relevant', label: 'Relevant' },
@@ -76,9 +84,13 @@ const CenterContent = () => {
 
             {/* posts*/}
             <div className="space-y-6">
-              {samplePosts.map((post) => (
-                <PostCard key={post.id} post={post} />
-              ))}
+              {posts.length === 0 ? (
+                <p className="text-gray-500">No posts found.</p>
+              ) : (
+                posts.map(post => (
+                  <PostCard key={post.id} post={post} />
+                ))
+              )}
             </div>
           </>
         )}

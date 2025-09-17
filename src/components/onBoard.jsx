@@ -1,12 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { X, ChevronRight } from 'lucide-react';
 import logo from '../assets/logo.webp'
-import samplePosts from '../data/samplePosts';
 import PostCard from './PostCard';
 
 const OnBoard = () => {
   const [inputValue, setInputValue] = useState('');
   const [showWelcome, setShowWelcome] = useState(true);
+    const [posts, setPosts] = useState([]);
+  
+    useEffect(() => {
+      // Fetch posts from your backend API
+      fetch('http://localhost:8081/posts/display')
+        .then(res => res.json())
+        .then(data => setPosts(data))
+        .catch(err => console.error('Failed to fetch posts:', err));
+    }, []);
+  
 
   const suggestedActions = [
     { id: 'welcome-thread', emoji: '😊', text: 'Join the Welcome thread', action: 'welcome' },
@@ -79,12 +88,16 @@ const OnBoard = () => {
         </div>
       )}
 
-      {/* Posts */}
-      <div className="space-y-6">
-        {samplePosts.map((post) => (
-          <PostCard key={post.id} post={post} />
-        ))}
-      </div>
+            {/* posts*/}
+            <div className="space-y-6">
+              {posts.length === 0 ? (
+                <p className="text-gray-500">No posts found.</p>
+              ) : (
+                posts.map(post => (
+                  <PostCard key={post.id} post={post} />
+                ))
+              )}
+            </div>
     </div>
   );
 };

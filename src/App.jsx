@@ -15,7 +15,7 @@ const AppContent = () => {
   const [user, setUser] = useState(null);
 
 
-  // Check if user is already logged in on app load
+  // Checking if user is already logged in on app load
 useEffect(() => {
   const token = localStorage.getItem('authToken');
   const savedUser = localStorage.getItem('user');
@@ -30,13 +30,11 @@ useEffect(() => {
     console.log('Account created successfully:', result);
     setUserToken(result.token);
     setIsAuthenticated(true);
-    // Navigate to signup flow after successful account creation
     navigate('/signup-flow');
   };
 
   const handleSignupFlowComplete = (signupFlowData) => {
     console.log('Signup flow completed:', signupFlowData);
-    // Navigate to main logged-in view
     navigate('/main-loggedin');
   };
 
@@ -96,7 +94,7 @@ useEffect(() => {
         path="/create-post" 
         element={
           isAuthenticated ? (
-            <CreatePost userToken={userToken} />
+            <CreatePost user={user} userToken={userToken} />
           ) : (
             <Navigate to="/login" replace />
           )

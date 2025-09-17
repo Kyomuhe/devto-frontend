@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   X, 
   Bold, 
@@ -13,48 +13,123 @@ import {
   Zap, 
   Image as ImageIcon,
   MoreHorizontal,
-  Settings
+  Settings,
+  Upload,
+  Trash2
 } from 'lucide-react';
 import logo from '../assets/logo.webp';
 import { useNavigate } from 'react-router-dom';
 
-const CreatePost = () => {
+const CreatePost = ({ user }) => {
   const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [tags, setTags] = useState('');
   const [content, setContent] = useState('');
   const [activeTab, setActiveTab] = useState('edit');
   const [coverImage, setCoverImage] = useState(null);
+  const [coverImagePreview, setCoverImagePreview] = useState(null);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [error, setError] = useState('');
+  
+  const fileInputRef = useRef(null);
 
-  //if (!isOpen) return null;
+  const userId = user?.id; 
 
   const handleCoverImageUpload = () => {
-    // Handle cover image upload
-    console.log('Upload cover image');
+    fileInputRef.current?.click();
   };
 
-  const handlePublish = () => {
-    const postData = {
-      title,
-      tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag),
-      content,
-      coverImage
-    };
-    console.log('Publishing post:', postData);
-    // Handle publish logic
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Validating file type
+      if (!file.type.startsWith('image/')) {
+        setError('Please select a valid image file');
+        return;
+      }
+
+      // Validate file size
+      if (file.size > 2 * 1024 * 1024) {
+        setError('Image size should be less than 5MB');
+        return;
+      }
+
+      setCoverImage(file);
+      
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setCoverImagePreview(previewUrl);
+      setError('');
+    }
   };
 
-  const handleSaveDraft = () => {
-    console.log('Saving draft');
-    // Handle save draft logic
+  const removeCoverImage = () => {
+    setCoverImage(null);
+    if (coverImagePreview) {
+      URL.revokeObjectURL(coverImagePreview);
+      setCoverImagePreview(null);
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
+
+  const handlePublish = async () => {
+    // Validation
+    if (!title.trim()) {
+      setError('Title is required');
+      return;
+    }
+    if (!content.trim()) {
+      setError('Content is required');
+      return;
+    }
+
+    setIsPublishing(true);
+    setError('');
+
+    try {
+      const formData = new FormData();
+      formData.append('title', title.trim());
+      formData.append('description', content.trim());
+      formData.append('tags', tags);
+      formData.append('userId', userId.toString());
+      
+      if (coverImage) {
+        formData.append('coverImage', coverImage);
+      }
+
+      const response = await fetch('http://localhost:8081/posts/create', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || `HTTP error! status: ${response.status}`);
+      }
+
+      const createdPost = await response.json();
+      console.log('Post created successfully:', createdPost);
+      
+      navigate(`/main-loggedin`, { replace: true });
+      
+    } catch (error) {
+      console.error('Error creating post:', error);
+      setError(error.message || 'Failed to create post. Please try again.');
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
 
   const handleRevertChanges = () => {
     console.log('Reverting changes');
     setTitle('');
     setTags('');
     setContent('');
-    setCoverImage(null);
+    removeCoverImage();
+    setError('');
   };
 
   const toolbarButtons = [
@@ -73,6 +148,15 @@ const CreatePost = () => {
 
   return (
     <div className="fixed inset-0 bg-white z-50 flex flex-col">
+      {/* Hidden file input */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileSelect}
+        accept="image/*"
+        className="hidden"
+      />
+
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 bg-gray-100 border-b border-gray-200">
         <div className="flex items-center space-x-4">
@@ -114,18 +198,52 @@ const CreatePost = () => {
         </div>
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className="px-6 py-3 bg-red-50 border-b border-red-200">
+          <p className="text-red-600 text-sm">{error}</p>
+        </div>
+      )}
+
       {/* Main Content */}
       <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-6 py-8">
         {activeTab === 'edit' ? (
           <>
             {/* Cover Image */}
             <div className="mb-6">
-              <button
-                onClick={handleCoverImageUpload}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors duration-200"
-              >
-                Add a cover image
-              </button>
+              {coverImagePreview ? (
+                <div className="relative">
+                  <img
+                    src={coverImagePreview}
+                    alt="Cover preview"
+                    className="w-full h-48 object-cover rounded-lg"
+                  />
+                  <div className="absolute top-2 right-2 flex space-x-2">
+                    <button
+                      onClick={handleCoverImageUpload}
+                      className="p-2 bg-white bg-opacity-90 rounded-full shadow-sm hover:bg-opacity-100 transition-all"
+                      title="Change cover image"
+                    >
+                      <Upload className="w-4 h-4 text-gray-700" />
+                    </button>
+                    <button
+                      onClick={removeCoverImage}
+                      className="p-2 bg-white bg-opacity-90 rounded-full shadow-sm hover:bg-opacity-100 transition-all"
+                      title="Remove cover image"
+                    >
+                      <Trash2 className="w-4 h-4 text-red-600" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={handleCoverImageUpload}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors duration-200 flex items-center space-x-2"
+                >
+                  <Upload className="w-4 h-4" />
+                  <span>Add a cover image</span>
+                </button>
+              )}
             </div>
 
             {/* Title */}
@@ -150,7 +268,7 @@ const CreatePost = () => {
                 type="text"
                 value={tags}
                 onChange={(e) => setTags(e.target.value)}
-                placeholder="Add up to 4 tags..."
+                placeholder="Add up to 4 tags (comma separated)..."
                 className="w-full text-gray-600 placeholder-gray-400 border-none outline-none"
               />
             </div>
@@ -184,9 +302,9 @@ const CreatePost = () => {
         ) : (
           /* Preview Tab */
           <div className="flex-1">
-            {coverImage && (
+            {coverImagePreview && (
               <img
-                src={coverImage}
+                src={coverImagePreview}
                 alt="Cover"
                 className="w-full h-48 object-cover rounded-lg mb-6"
               />
@@ -227,13 +345,18 @@ const CreatePost = () => {
         <div className="flex items-center space-x-4">
           <button
             onClick={handlePublish}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-md transition-colors duration-200"
+            disabled={isPublishing}
+            className={`font-medium px-6 py-2 rounded-md transition-colors duration-200 ${
+              isPublishing
+                ? 'bg-gray-400 text-white cursor-not-allowed'
+                : 'bg-blue-600 hover:bg-blue-700 text-white'
+            }`}
           >
-            Publish
+            {isPublishing ? 'Publishing...' : 'Publish'}
           </button>
           <button
-            onClick={handleSaveDraft}
-            className="text-gray-600 hover:text-gray-900 font-medium transition-colors duration-200"
+            disabled={isPublishing}
+            className="text-gray-600 hover:text-gray-900 font-medium transition-colors duration-200 disabled:opacity-50"
           >
             Save draft
           </button>
@@ -245,7 +368,8 @@ const CreatePost = () => {
           </button>
           <button
             onClick={handleRevertChanges}
-            className="text-gray-600 hover:text-gray-900 font-medium transition-colors duration-200"
+            disabled={isPublishing}
+            className="text-gray-600 hover:text-gray-900 font-medium transition-colors duration-200 disabled:opacity-50"
           >
             Revert new changes
           </button>
