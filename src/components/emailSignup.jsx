@@ -85,9 +85,9 @@ const signupUser = async (userData) => {
       formData.append('profileImage', userData.profileImage);
     }
 
-    const response = await fetch('http://localhost:8081/api/auth/signup-with-image', {
+    const response = await fetch('http://localhost:8081/api/auth/signup', {
       method: 'POST',
-      body: formData, // No need for headers, browser sets them for FormData
+      body: formData, 
     });
 
     const data = await response.json();

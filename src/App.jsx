@@ -7,6 +7,7 @@ import SignupFlow from "./components/signup/SignupFlow";
 import EmailSignup from "./components/emailSignup";
 import MainLoggedin from "./pages/mainLoggedin";
 import CreatePost from "./models/CreatePost";
+import MyPosts from "./components/MyPosts";
 
 const AppContent = () => {
   const navigate = useNavigate();
@@ -100,6 +101,9 @@ useEffect(() => {
           )
         } 
       />
+      <Route path="/my-posts" element={<MyPosts user={user} />} />
+
+
     </Routes>
   );
 };

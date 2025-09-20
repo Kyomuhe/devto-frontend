@@ -93,7 +93,9 @@ const HeaderLoggedin = ({ user,handleLogout }) => {
                 onSignOut={() => {
                   handleLogout();
                   setIsProfileOpen(false);
-                }}
+                }
+
+              }
               />
             </div>
           </div>
