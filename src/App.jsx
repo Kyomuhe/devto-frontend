@@ -8,6 +8,7 @@ import EmailSignup from "./components/emailSignup";
 import MainLoggedin from "./pages/mainLoggedin";
 import CreatePost from "./models/CreatePost";
 import MyPosts from "./components/MyPosts";
+import EditPost from "./components/EditPost";
 
 const AppContent = () => {
   const navigate = useNavigate();
@@ -102,6 +103,9 @@ useEffect(() => {
         } 
       />
       <Route path="/my-posts" element={<MyPosts user={user} />} />
+
+      <Route path="/edit-post/:postId" element={<EditPost user={user} />} />
+
 
 
     </Routes>

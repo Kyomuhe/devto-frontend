@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   X, 
   Bold, 
@@ -20,7 +20,7 @@ import {
 import logo from '../assets/logo.webp';
 import { useNavigate } from 'react-router-dom';
 
-const CreatePost = ({ user }) => {
+const CreatePost = ({ user, existingPost, isEditing = false }) => {
   const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [tags, setTags] = useState('');
@@ -30,10 +30,26 @@ const CreatePost = ({ user }) => {
   const [coverImagePreview, setCoverImagePreview] = useState(null);
   const [isPublishing, setIsPublishing] = useState(false);
   const [error, setError] = useState('');
+  const [hasExistingImage, setHasExistingImage] = useState(false);
   
   const fileInputRef = useRef(null);
 
-  const userId = user?.id; 
+  const userId = user?.id;
+
+  // Pre-fill form data when editing
+  useEffect(() => {
+    if (isEditing && existingPost) {
+      setTitle(existingPost.title || '');
+      setTags(existingPost.tags || '');
+      setContent(existingPost.description || '');
+      
+      // Check if existing post has cover image
+      if (existingPost.hasCoverImage || existingPost.coverImage) {
+        setHasExistingImage(true);
+        setCoverImagePreview(`http://localhost:8081/posts/image/${existingPost.postId}`);
+      }
+    }
+  }, [isEditing, existingPost]);
 
   const handleCoverImageUpload = () => {
     fileInputRef.current?.click();
@@ -49,7 +65,7 @@ const CreatePost = ({ user }) => {
       }
 
       // Validate file size
-      if (file.size > 2 * 1024 * 1024) {
+      if (file.size > 5 * 1024 * 1024) {
         setError('Image size should be less than 5MB');
         return;
       }
@@ -59,16 +75,18 @@ const CreatePost = ({ user }) => {
       // Create preview URL
       const previewUrl = URL.createObjectURL(file);
       setCoverImagePreview(previewUrl);
+      setHasExistingImage(false); // New image replaces existing one
       setError('');
     }
   };
 
   const removeCoverImage = () => {
     setCoverImage(null);
-    if (coverImagePreview) {
+    if (coverImagePreview && !hasExistingImage) {
       URL.revokeObjectURL(coverImagePreview);
-      setCoverImagePreview(null);
     }
+    setCoverImagePreview(null);
+    setHasExistingImage(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -95,12 +113,19 @@ const CreatePost = ({ user }) => {
       formData.append('tags', tags);
       formData.append('userId', userId.toString());
       
+      // Only append cover image if a new one was selected
       if (coverImage) {
         formData.append('coverImage', coverImage);
       }
 
-      const response = await fetch('http://localhost:8081/posts/create', {
-        method: 'POST',
+      const url = isEditing 
+        ? `http://localhost:8081/posts/${existingPost.postId}` 
+        : 'http://localhost:8081/posts/create';
+      
+      const method = isEditing ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method: method,
         body: formData,
       });
 
@@ -109,26 +134,43 @@ const CreatePost = ({ user }) => {
         throw new Error(errorText || `HTTP error! status: ${response.status}`);
       }
 
-      const createdPost = await response.json();
-      console.log('Post created successfully:', createdPost);
+      const savedPost = await response.json();
+      console.log(`Post ${isEditing ? 'updated' : 'created'} successfully:`, savedPost);
       
-      navigate(`/main-loggedin`, { replace: true });
+      // Navigate back to my posts if editing, or to main page if creating
+      navigate(isEditing ? '/my-posts' : '/main-loggedin', { replace: true });
       
     } catch (error) {
-      console.error('Error creating post:', error);
-      setError(error.message || 'Failed to create post. Please try again.');
+      console.error(`Error ${isEditing ? 'updating' : 'creating'} post:`, error);
+      setError(error.message || `Failed to ${isEditing ? 'update' : 'create'} post. Please try again.`);
     } finally {
       setIsPublishing(false);
     }
   };
 
-
   const handleRevertChanges = () => {
-    console.log('Reverting changes');
-    setTitle('');
-    setTags('');
-    setContent('');
-    removeCoverImage();
+    if (isEditing && existingPost) {
+      // Revert to original values
+      setTitle(existingPost.title || '');
+      setTags(existingPost.tags || '');
+      setContent(existingPost.description || '');
+      
+      // Reset image to original state
+      setCoverImage(null);
+      if (existingPost.hasCoverImage || existingPost.coverImage) {
+        setHasExistingImage(true);
+        setCoverImagePreview(`http://localhost:8081/posts/image/${existingPost.postId}`);
+      } else {
+        setCoverImagePreview(null);
+        setHasExistingImage(false);
+      }
+    } else {
+      // Clear everything for new post
+      setTitle('');
+      setTags('');
+      setContent('');
+      removeCoverImage();
+    }
     setError('');
   };
 
@@ -165,7 +207,9 @@ const CreatePost = ({ user }) => {
             alt="DEV"
             className="w-8 h-8"
           />
-          <h1 className="text-lg font-semibold text-gray-900">Create Post</h1>
+          <h1 className="text-lg font-semibold text-gray-900">
+            {isEditing ? 'Edit Post' : 'Create Post'}
+          </h1>
         </div>
 
         <div className="flex items-center space-x-4">
@@ -190,7 +234,7 @@ const CreatePost = ({ user }) => {
             Preview
           </button>
           <button
-            onClick={() => navigate(-1)} 
+            onClick={() => navigate(isEditing ? '/my-posts' : -1)} 
             className="text-gray-600 hover:text-gray-900 transition-colors duration-200"
           >
             <X className="w-6 h-6" />
@@ -251,7 +295,7 @@ const CreatePost = ({ user }) => {
               <textarea
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="New post title here..."
+                placeholder={isEditing ? "Edit post title..." : "New post title here..."}
                 className="w-full text-4xl font-bold text-gray-900 placeholder-gray-500 border-none outline-none resize-none overflow-hidden"
                 rows={1}
                 style={{ minHeight: '60px' }}
@@ -294,7 +338,7 @@ const CreatePost = ({ user }) => {
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                placeholder="Write your post content here..."
+                placeholder={isEditing ? "Edit your post content..." : "Write your post content here..."}
                 className="w-full h-full min-h-96 text-gray-700 placeholder-gray-400 border-none outline-none resize-none"
               />
             </div>
@@ -311,7 +355,7 @@ const CreatePost = ({ user }) => {
             )}
             
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              {title || 'New post title here...'}
+              {title || (isEditing ? "Edit post title..." : "New post title here...")}
             </h1>
             
             {tags && (
@@ -333,7 +377,9 @@ const CreatePost = ({ user }) => {
                   {content}
                 </pre>
               ) : (
-                <p className="text-gray-400">Write your post content here...</p>
+                <p className="text-gray-400">
+                  {isEditing ? "Edit your post content..." : "Write your post content here..."}
+                </p>
               )}
             </div>
           </div>
@@ -352,7 +398,10 @@ const CreatePost = ({ user }) => {
                 : 'bg-blue-600 hover:bg-blue-700 text-white'
             }`}
           >
-            {isPublishing ? 'Publishing...' : 'Publish'}
+            {isPublishing 
+              ? (isEditing ? 'Updating...' : 'Publishing...') 
+              : (isEditing ? 'Update Post' : 'Publish')
+            }
           </button>
           <button
             disabled={isPublishing}
@@ -371,7 +420,7 @@ const CreatePost = ({ user }) => {
             disabled={isPublishing}
             className="text-gray-600 hover:text-gray-900 font-medium transition-colors duration-200 disabled:opacity-50"
           >
-            Revert new changes
+            {isEditing ? 'Revert changes' : 'Revert new changes'}
           </button>
         </div>
       </div>
