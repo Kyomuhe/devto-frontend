@@ -49,7 +49,7 @@ const MyPosts = ({ user }) => {
         throw new Error('Failed to delete post');
       }
 
-      // Remove the deleted post from the local state
+      // Removing the deleted post from the local state
       setPosts(posts.filter(post => post.postId !== postId));
       setDeleteModal({ isOpen: false, postId: null, postTitle: '' });
     } catch (error) {
@@ -106,7 +106,6 @@ const MyPosts = ({ user }) => {
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-8">
-      {/* Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
@@ -115,12 +114,23 @@ const MyPosts = ({ user }) => {
               {posts.length} {posts.length === 1 ? 'post' : 'posts'} published
             </p>
           </div>
-          <button
-            onClick={() => navigate('/create-post')}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors duration-200"
-          >
-            Create New Post
-          </button>
+      <button
+        onClick={() => navigate('/create-post')}
+        className="group relative bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 
+                   text-white px-8 py-4 rounded-xl font-semibold text-sm
+                   transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/25 hover:-translate-y-1
+                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                   before:absolute before:inset-0 before:bg-gradient-to-r before:from-white/20 before:to-transparent 
+                   before:rounded-xl before:opacity-0 before:transition-opacity before:duration-300
+                   hover:before:opacity-100"
+      >
+        <span className="relative z-10 flex items-center space-x-2">
+          <svg className="w-4 h-4 transition-transform group-hover:rotate-180 duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          <span>Create New Post</span>
+        </span>
+      </button>
         </div>
       </div>
 
@@ -259,7 +269,7 @@ const MyPosts = ({ user }) => {
         </div>
       )}
 
-      {/* Enhanced Delete Confirmation Modal */}
+      {/* Delete Confirmation Modal */}
       {deleteModal.isOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
           <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl transform animate-scaleIn">

@@ -27,7 +27,11 @@ const MainLoggedin = ({ onLogout, userToken, user }) => {
         <div className="flex">
           <LeftSidebar />
 
-          <OnBoard/>
+          <OnBoard
+            handleLogout={onLogout}
+            userToken={userToken}
+            user={user} 
+/>
 
           <div className='flex flex-col'>
             <ActiveDiscussions />

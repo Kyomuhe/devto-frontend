@@ -3,7 +3,7 @@ import { X, ChevronRight } from 'lucide-react';
 import logo from '../assets/logo.webp'
 import PostCard from './PostCard';
 
-const OnBoard = () => {
+const OnBoard = ({onLogout, userToken, user}) => {
   const [inputValue, setInputValue] = useState('');
   const [showWelcome, setShowWelcome] = useState(true);
     const [posts, setPosts] = useState([]);
@@ -90,13 +90,17 @@ const OnBoard = () => {
 
             {/* posts*/}
             <div className="space-y-6">
-              {posts.length === 0 ? (
-                <p className="text-gray-500">No posts found.</p>
-              ) : (
-                posts.map(post => (
-                  <PostCard key={post.id} post={post} />
-                ))
-              )}
+        {posts.length === 0 ? (
+          <p className="text-gray-500">No posts found.</p>
+        ) : (
+          posts.map(post => (
+            <PostCard 
+              key={post.postId || post.id} 
+              post={post} 
+              currentUserId={user?.id} // This is the key addition!
+            />
+          ))
+        )}
             </div>
     </div>
   );
