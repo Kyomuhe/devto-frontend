@@ -45,8 +45,9 @@ export default function ProfileModal({
             <div
                 className="py-2 cursor-pointer border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200"
             >
-                Settings
+                Book marks
             </div>
+
             <div className="border-t border-gray-200 mt-2 mb-2" />
             <div
                 className="py-2 cursor-pointer text-red-600 hover:bg-red-50 transition-colors duration-200"

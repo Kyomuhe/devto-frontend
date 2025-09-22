@@ -1,5 +1,5 @@
 // CommentsModal.jsx
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Send } from 'lucide-react';
 import { commentsAPI } from '../services/api';
 import defaultAvatar from '../assets/default.png';

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import CreatePost from '../models/CreatePost';
 
@@ -26,7 +26,7 @@ const EditPost = ({ user }) => {
       
       const post = await response.json();
       
-      // Verify that the user owns this post
+      // Verifying that the user owns this post
       if (post.user.id !== user.id) {
         setError('You do not have permission to edit this post');
         return;

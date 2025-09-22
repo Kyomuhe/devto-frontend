@@ -1,21 +1,25 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, ChevronRight } from 'lucide-react';
 import logo from '../assets/logo.webp'
 import PostCard from './PostCard';
 
-const OnBoard = ({onLogout, userToken, user}) => {
+const OnBoard = ({ onLogout, userToken, user }) => {
   const [inputValue, setInputValue] = useState('');
   const [showWelcome, setShowWelcome] = useState(true);
-    const [posts, setPosts] = useState([]);
-  
-    useEffect(() => {
-      // Fetch posts from your backend API
-      fetch('http://localhost:8081/posts/display')
-        .then(res => res.json())
-        .then(data => setPosts(data))
-        .catch(err => console.error('Failed to fetch posts:', err));
-    }, []);
-  
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    fetch('http://localhost:8081/posts/display')
+      .then(res => res.json())
+      .then(data => {
+        // Sort newest first
+        const sorted = data.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        setPosts(sorted);
+      })
+      .catch(err => console.error('Failed to fetch posts:', err));
+  }, []);
 
   const suggestedActions = [
     { id: 'welcome-thread', emoji: '😊', text: 'Join the Welcome thread', action: 'welcome' },
@@ -88,20 +92,20 @@ const OnBoard = ({onLogout, userToken, user}) => {
         </div>
       )}
 
-            {/* posts*/}
-            <div className="space-y-6">
+      {/* Posts */}
+      <div className="space-y-6">
         {posts.length === 0 ? (
           <p className="text-gray-500">No posts found.</p>
         ) : (
           posts.map(post => (
-            <PostCard 
-              key={post.postId || post.id} 
-              post={post} 
-              currentUserId={user?.id} // This is the key addition!
+            <PostCard
+              key={post.postId || post.id}
+              post={post}
+              currentUserId={user?.id}
             />
           ))
         )}
-            </div>
+      </div>
     </div>
   );
 };

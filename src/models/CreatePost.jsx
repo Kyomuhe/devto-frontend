@@ -33,23 +33,42 @@ const CreatePost = ({ user, existingPost, isEditing = false }) => {
   const [hasExistingImage, setHasExistingImage] = useState(false);
   
   const fileInputRef = useRef(null);
+  const titleTextareaRef = useRef(null);
+  const contentTextareaRef = useRef(null);
 
   const userId = user?.id;
 
-  // Pre-fill form data when editing
+  // Auto-resize function for textareas
+  const autoResize = (textarea) => {
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = textarea.scrollHeight + 'px';
+    }
+  };
+
+  // Pre-filling form data when editing
   useEffect(() => {
     if (isEditing && existingPost) {
       setTitle(existingPost.title || '');
       setTags(existingPost.tags || '');
       setContent(existingPost.description || '');
       
-      // Check if existing post has cover image
+      // Checking if existing post has cover image
       if (existingPost.hasCoverImage || existingPost.coverImage) {
         setHasExistingImage(true);
         setCoverImagePreview(`http://localhost:8081/posts/image/${existingPost.postId}`);
       }
     }
   }, [isEditing, existingPost]);
+
+  // Auto-resize textareas when content changes
+  useEffect(() => {
+    autoResize(titleTextareaRef.current);
+  }, [title]);
+
+  useEffect(() => {
+    autoResize(contentTextareaRef.current);
+  }, [content]);
 
   const handleCoverImageUpload = () => {
     fileInputRef.current?.click();
@@ -64,7 +83,6 @@ const CreatePost = ({ user, existingPost, isEditing = false }) => {
         return;
       }
 
-      // Validate file size
       if (file.size > 5 * 1024 * 1024) {
         setError('Image size should be less than 5MB');
         return;
@@ -72,7 +90,7 @@ const CreatePost = ({ user, existingPost, isEditing = false }) => {
 
       setCoverImage(file);
       
-      // Create preview URL
+      // Creating preview URL
       const previewUrl = URL.createObjectURL(file);
       setCoverImagePreview(previewUrl);
       setHasExistingImage(false); // New image replaces existing one
@@ -90,6 +108,16 @@ const CreatePost = ({ user, existingPost, isEditing = false }) => {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+  };
+
+  const handleTitleChange = (e) => {
+    setTitle(e.target.value);
+    autoResize(e.target);
+  };
+
+  const handleContentChange = (e) => {
+    setContent(e.target.value);
+    autoResize(e.target);
   };
 
   const handlePublish = async () => {
@@ -172,6 +200,12 @@ const CreatePost = ({ user, existingPost, isEditing = false }) => {
       removeCoverImage();
     }
     setError('');
+    
+    // Reset textarea heights after clearing content
+    setTimeout(() => {
+      autoResize(titleTextareaRef.current);
+      autoResize(contentTextareaRef.current);
+    }, 0);
   };
 
   const toolbarButtons = [
@@ -242,7 +276,6 @@ const CreatePost = ({ user, existingPost, isEditing = false }) => {
         </div>
       </div>
 
-      {/* Error Message */}
       {error && (
         <div className="px-6 py-3 bg-red-50 border-b border-red-200">
           <p className="text-red-600 text-sm">{error}</p>
@@ -250,7 +283,7 @@ const CreatePost = ({ user, existingPost, isEditing = false }) => {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-6 py-8">
+      <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-6 py-8 overflow-y-auto">
         {activeTab === 'edit' ? (
           <>
             {/* Cover Image */}
@@ -293,15 +326,16 @@ const CreatePost = ({ user, existingPost, isEditing = false }) => {
             {/* Title */}
             <div className="mb-6">
               <textarea
+                ref={titleTextareaRef}
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={handleTitleChange}
                 placeholder={isEditing ? "Edit post title..." : "New post title here..."}
-                className="w-full text-4xl font-bold text-gray-900 placeholder-gray-500 border-none outline-none resize-none overflow-hidden"
+                className="w-full text-4xl font-bold text-gray-900 placeholder-gray-500 border-none outline-none resize-none overflow-hidden leading-tight"
                 rows={1}
-                style={{ minHeight: '60px' }}
-                onInput={(e) => {
-                  e.target.style.height = 'auto';
-                  e.target.style.height = e.target.scrollHeight + 'px';
+                style={{ 
+                  minHeight: '60px',
+                  maxHeight: '200px',
+                  lineHeight: '1.2'
                 }}
               />
             </div>
@@ -313,7 +347,8 @@ const CreatePost = ({ user, existingPost, isEditing = false }) => {
                 value={tags}
                 onChange={(e) => setTags(e.target.value)}
                 placeholder="Add up to 4 tags (comma separated)..."
-                className="w-full text-gray-600 placeholder-gray-400 border-none outline-none"
+                className="w-full text-gray-600 placeholder-gray-400 border-none outline-none py-2"
+                maxLength={200}
               />
             </div>
 
@@ -336,10 +371,15 @@ const CreatePost = ({ user, existingPost, isEditing = false }) => {
             {/* Content Editor */}
             <div className="flex-1 mb-8">
               <textarea
+                ref={contentTextareaRef}
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
+                onChange={handleContentChange}
                 placeholder={isEditing ? "Edit your post content..." : "Write your post content here..."}
-                className="w-full h-full min-h-96 text-gray-700 placeholder-gray-400 border-none outline-none resize-none"
+                className="w-full text-gray-700 placeholder-gray-400 border-none outline-none resize-none leading-relaxed"
+                style={{ 
+                  minHeight: '400px',
+                  lineHeight: '1.6'
+                }}
               />
             </div>
           </>
@@ -354,7 +394,7 @@ const CreatePost = ({ user, existingPost, isEditing = false }) => {
               />
             )}
             
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4 leading-tight">
               {title || (isEditing ? "Edit post title..." : "New post title here...")}
             </h1>
             
@@ -373,7 +413,7 @@ const CreatePost = ({ user, existingPost, isEditing = false }) => {
             
             <div className="prose max-w-none">
               {content ? (
-                <pre className="whitespace-pre-wrap font-sans">
+                <pre className="whitespace-pre-wrap font-sans text-gray-700 leading-relaxed">
                   {content}
                 </pre>
               ) : (

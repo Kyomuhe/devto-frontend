@@ -13,6 +13,7 @@ const PostCard = ({ post, currentUserId }) => {
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(false);
   const [submittingComment, setSubmittingComment] = useState(false);
+  const [showFullDescription, setShowFullDescription] = useState(false);
 
   // Default tag colors
   const tagColors = {
@@ -37,7 +38,6 @@ const PostCard = ({ post, currentUserId }) => {
         commentsAPI.getCommentCount(post.postId)
       ];
 
-      // Only check like status if user is logged in
       if (currentUserId) {
         requests.push(likesAPI.hasUserLikedPost(post.postId, currentUserId));
       }
@@ -69,28 +69,15 @@ const PostCard = ({ post, currentUserId }) => {
     e.preventDefault();
     e.stopPropagation();
     
-    if (!currentUserId || loading) {
-      console.log('Cannot like: user not logged in or loading');
-      return;
-    }
+    if (!currentUserId || loading) return;
 
     try {
       setLoading(true);
-      console.log('Toggling like for post:', post.postId, 'user:', currentUserId);
-      
       const response = await likesAPI.toggleLike(post.postId, currentUserId);
-      console.log('Like toggle response:', response);
       
       if (response && !response.error) {
         setIsLiked(response.liked);
-        // Update like count immediately
-        if (response.liked) {
-          setLikeCount(prev => prev + 1);
-        } else {
-          setLikeCount(prev => Math.max(0, prev - 1));
-        }
-      } else {
-        console.error('Like toggle error:', response);
+        setLikeCount(prev => response.liked ? prev + 1 : Math.max(0, prev - 1));
       }
     } catch (error) {
       console.error('Error toggling like:', error);
@@ -108,29 +95,20 @@ const PostCard = ({ post, currentUserId }) => {
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!newComment.trim() || !currentUserId || submittingComment) {
-      return;
-    }
+    if (!newComment.trim() || !currentUserId || submittingComment) return;
 
     try {
       setSubmittingComment(true);
-      console.log('Submitting comment:', { postId: post.postId, userId: currentUserId, content: newComment });
-      
       const response = await commentsAPI.createComment(
         post.postId, 
         currentUserId, 
         newComment.trim()
       );
       
-      console.log('Comment response:', response);
-      
       if (response && !response.error) {
         setNewComment('');
-        await fetchComments(); // Refresh comments
+        await fetchComments();
         setCommentCount(prev => prev + 1);
-      } else {
-        console.error('Error creating comment:', response);
       }
     } catch (error) {
       console.error('Error submitting comment:', error);
@@ -178,13 +156,14 @@ const PostCard = ({ post, currentUserId }) => {
     }
   };
 
-  // Display first 2 comments by default
   const displayedComments = showAllComments ? comments : comments.slice(0, 2);
   const hasMoreComments = comments.length > 2;
 
   return (
-    <article className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200">
-      {/* Post Image */}
+    <article className="bg-white border border-gray-200 rounded-lg shadow-sm 
+      overflow-hidden hover:shadow-md transition-shadow duration-200 
+      max-w-2xl mx-auto mb-6">
+      
       {post.coverImage && (
         <div className="aspect-video w-full overflow-hidden">
           <img
@@ -192,7 +171,6 @@ const PostCard = ({ post, currentUserId }) => {
             alt={post.title}
             className="w-full h-full object-cover hover:scale-105 transition-transform duration-200 cursor-pointer"
             onError={(e) => {
-              console.log('Cover image failed to load for post ID:', post.postId);
               e.target.style.display = 'none';
               e.target.parentElement.style.display = 'none';
             }}
@@ -200,7 +178,6 @@ const PostCard = ({ post, currentUserId }) => {
         </div>
       )}
 
-      {/* Post Content */}
       <div className="p-6">
         {/* Author Info */}
         <div className="flex items-center space-x-3 mb-4">
@@ -212,11 +189,7 @@ const PostCard = ({ post, currentUserId }) => {
             }
             alt={post.user?.name || post.author?.name || 'Anonymous'}
             className="w-8 h-8 rounded-full object-cover bg-gray-200"
-            onError={(e) => {
-              if (e.target.src !== defaultAvatar) {
-                e.target.src = defaultAvatar;
-              }
-            }}
+            onError={(e) => { e.target.src = defaultAvatar; }}
           />
 
           <div className="flex items-center space-x-2 text-sm text-gray-600">
@@ -228,19 +201,30 @@ const PostCard = ({ post, currentUserId }) => {
           </div>
         </div>
 
-        {/* Post Title */}
+        {/* Title */}
         <h2 className="text-xl font-bold text-gray-900 mb-3 hover:text-blue-600 cursor-pointer leading-tight">
           {post.title}
         </h2>
 
-        {/* Post Description/Content Preview */}
+        {/* Description with Show more/less */}
         {post.description && (
-          <p className="text-gray-600 mb-4 line-clamp-3">
-            {post.description.length > 150 
-              ? `${post.description.substring(0, 150)}...` 
-              : post.description
-            }
-          </p>
+          <div className="mb-4">
+            <p className="text-gray-600">
+              {showFullDescription
+                ? post.description
+                : post.description.length > 150
+                  ? `${post.description.substring(0, 150)}...`
+                  : post.description}
+            </p>
+            {post.description.length > 150 && (
+              <button
+                onClick={() => setShowFullDescription(!showFullDescription)}
+                className="text-sm text-blue-600 hover:text-blue-800 font-medium mt-1"
+              >
+                {showFullDescription ? 'Show less' : 'Show more'}
+              </button>
+            )}
+          </div>
         )}
 
         {/* Tags */}
@@ -257,10 +241,9 @@ const PostCard = ({ post, currentUserId }) => {
           </div>
         )}
 
-        {/* Post Stats and Actions */}
+        {/* Stats and Actions */}
         <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
           <div className="flex items-center space-x-4">
-            {/* Like Button */}
             <button 
               onClick={handleLikeToggle}
               disabled={!currentUserId || loading}
@@ -280,7 +263,6 @@ const PostCard = ({ post, currentUserId }) => {
               </span>
             </button>
 
-            {/* Comment Button */}
             <button 
               onClick={handleCommentClick}
               className="flex items-center space-x-1 hover:bg-gray-50 px-2 py-1 rounded cursor-pointer transition-colors hover:text-blue-600"
@@ -293,17 +275,15 @@ const PostCard = ({ post, currentUserId }) => {
           </div>
 
           <div className="flex items-center space-x-3">
-            {/* Bookmark */}
             <button className="hover:bg-gray-50 p-1 rounded transition-colors">
               <Bookmark className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* Comments Section */}
+        {/* Comments */}
         {showComments && (
           <div className="border-t border-gray-100 pt-4">
-            {/* Comments List */}
             {comments.length > 0 && (
               <div className="space-y-3 mb-4">
                 {displayedComments.map((comment) => (
@@ -316,11 +296,7 @@ const PostCard = ({ post, currentUserId }) => {
                       }
                       alt={comment.user?.name || 'User'}
                       className="w-6 h-6 rounded-full object-cover bg-gray-200 flex-shrink-0 mt-1"
-                      onError={(e) => {
-                        if (e.target.src !== defaultAvatar) {
-                          e.target.src = defaultAvatar;
-                        }
-                      }}
+                      onError={(e) => { e.target.src = defaultAvatar; }}
                     />
                     <div className="flex-1 min-w-0">
                       <div className="bg-gray-50 rounded-lg px-3 py-2">
@@ -360,18 +336,13 @@ const PostCard = ({ post, currentUserId }) => {
               </div>
             )}
 
-            {/* Comment Input */}
             {currentUserId ? (
               <form onSubmit={handleCommentSubmit} className="flex space-x-3">
                 <img
                   src={`http://localhost:8081/api/auth/user/${currentUserId}/profile-image`}
                   alt="Your avatar"
                   className="w-6 h-6 rounded-full object-cover bg-gray-200 flex-shrink-0 mt-2"
-                  onError={(e) => {
-                    if (e.target.src !== defaultAvatar) {
-                      e.target.src = defaultAvatar;
-                    }
-                  }}
+                  onError={(e) => { e.target.src = defaultAvatar; }}
                 />
                 <div className="flex-1 flex space-x-2">
                   <input
@@ -401,7 +372,6 @@ const PostCard = ({ post, currentUserId }) => {
           </div>
         )}
 
-        {/* Login prompt for non-authenticated users */}
         {!currentUserId && (
           <div className="mt-3 text-xs text-gray-500">
             <span>Please log in to like and comment on posts</span>

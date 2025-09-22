@@ -9,10 +9,15 @@ const CenterContent = () => {
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
-    // Fetch posts from your backend API
     fetch('http://localhost:8081/posts/display')
       .then(res => res.json())
-      .then(data => setPosts(data))
+      .then(data => {
+        // ✅ Sort newest first
+        const sorted = data.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        setPosts(sorted);
+      })
       .catch(err => console.error('Failed to fetch posts:', err));
   }, []);
 
@@ -82,13 +87,13 @@ const CenterContent = () => {
               </div>
             )}
 
-            {/* posts*/}
+            {/* Posts */}
             <div className="space-y-6">
               {posts.length === 0 ? (
                 <p className="text-gray-500">No posts found.</p>
               ) : (
                 posts.map(post => (
-                  <PostCard key={post.id} post={post} />
+                  <PostCard key={post.postId || post.id} post={post} />
                 ))
               )}
             </div>
