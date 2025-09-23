@@ -9,6 +9,7 @@ import MainLoggedin from "./pages/mainLoggedin";
 import CreatePost from "./models/CreatePost";
 import MyPosts from "./components/MyPosts";
 import EditPost from "./components/EditPost";
+import BookmarkPage from "./components/BookMark";
 
 const AppContent = () => {
   const navigate = useNavigate();
@@ -105,6 +106,8 @@ useEffect(() => {
       <Route path="/my-posts" element={<MyPosts user={user} />} />
 
       <Route path="/edit-post/:postId" element={<EditPost user={user} />} />
+      <Route path="/bookmarks" element={<BookmarkPage user={user} />} />
+
 
 
 

@@ -15,8 +15,14 @@ export default function ProfileModal({
 
     const handleMyPosts = () => {
         navigate('/my-posts');
-        if (onClose) onClose(); // Close the modal after navigation
+        if (onClose) onClose(); 
     };
+
+        const handleBookMarks = () => {
+        navigate('/bookmarks');
+        if (onClose) onClose(); 
+    };
+
 
     const handleCreatePost = () => {
         if (onCreatePost) onCreatePost();
@@ -44,6 +50,8 @@ export default function ProfileModal({
             </div>
             <div
                 className="py-2 cursor-pointer border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200"
+                onClick= {handleBookMarks}
+
             >
                 Book marks
             </div>

@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { MessageCircle, Bookmark, Heart, Send } from 'lucide-react';
 import defaultAvatar from '../assets/default.png';
 import { likesAPI, commentsAPI } from '../services/api';
+import {BookmarkButton} from './BookMark';
 
-const PostCard = ({ post, currentUserId }) => {
+const PostCard = ({ post, currentUserId, isInitiallyBookmarked = false, onBookmarkChange }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [comments, setComments] = useState([]);
@@ -14,6 +15,23 @@ const PostCard = ({ post, currentUserId }) => {
   const [loading, setLoading] = useState(false);
   const [submittingComment, setSubmittingComment] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
+  
+  const [isBookmarked, setIsBookmarked] = useState(isInitiallyBookmarked);
+  const [bookmarkLoading, setBookmarkLoading] = useState(false);
+
+  const checkBookmarkStatus = async () => {
+    if (!currentUserId || !post.postId) return;
+    
+    try {
+      const response = await fetch(`http://localhost:8081/posts/checkBookmark/${currentUserId}/${post.postId}`);
+      if (response.ok) {
+        const bookmarkStatus = await response.json();
+        setIsBookmarked(bookmarkStatus);
+      }
+    } catch (error) {
+      console.error('Error checking bookmark status:', error);
+    }
+  };
 
   // Default tag colors
   const tagColors = {
@@ -28,8 +46,15 @@ const PostCard = ({ post, currentUserId }) => {
   useEffect(() => {
     if (post.postId) {
       fetchPostStats();
+      if (currentUserId) {
+        checkBookmarkStatus();
+      }
     }
   }, [post.postId, currentUserId]);
+
+  useEffect(() => {
+    setIsBookmarked(isInitiallyBookmarked);
+  }, [isInitiallyBookmarked]);
 
   const fetchPostStats = async () => {
     try {
@@ -159,6 +184,13 @@ const PostCard = ({ post, currentUserId }) => {
   const displayedComments = showAllComments ? comments : comments.slice(0, 2);
   const hasMoreComments = comments.length > 2;
 
+  const handleBookmarkChange = (postId, newBookmarkState) => {
+    setIsBookmarked(newBookmarkState);
+    if (onBookmarkChange) {
+      onBookmarkChange(postId, newBookmarkState);
+    }
+  };
+
   return (
     <article className="bg-white border border-gray-200 rounded-lg shadow-sm 
       overflow-hidden hover:shadow-md transition-shadow duration-200 
@@ -275,9 +307,12 @@ const PostCard = ({ post, currentUserId }) => {
           </div>
 
           <div className="flex items-center space-x-3">
-            <button className="hover:bg-gray-50 p-1 rounded transition-colors">
-              <Bookmark className="w-4 h-4" />
-            </button>
+            <BookmarkButton
+              postId={post.postId} 
+              userId={currentUserId} 
+              isInitiallyBookmarked={isBookmarked}
+              onBookmarkChange={handleBookmarkChange}
+            />
           </div>
         </div>
 
