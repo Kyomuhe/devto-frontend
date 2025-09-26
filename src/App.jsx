@@ -10,6 +10,8 @@ import CreatePost from "./models/CreatePost";
 import MyPosts from "./components/MyPosts";
 import EditPost from "./components/EditPost";
 import BookmarkPage from "./components/BookMark";
+import Dashboard from "./components/Dashboard";
+import DashboardLayout from "./components/DashboardLayout";
 
 const AppContent = () => {
   const navigate = useNavigate();
@@ -103,10 +105,13 @@ useEffect(() => {
           )
         } 
       />
-      <Route path="/my-posts" element={<MyPosts user={user} />} />
+        <Route element={<DashboardLayout user={user} />}>
+          <Route path="/dashboard" element={<Dashboard user={user} />} />
+          <Route path="/my-posts" element={<MyPosts user={user} />} />
+          <Route path="/bookmarks" element={<BookmarkPage user={user} />} />
+        </Route>
 
       <Route path="/edit-post/:postId" element={<EditPost user={user} />} />
-      <Route path="/bookmarks" element={<BookmarkPage user={user} />} />
 
 
 

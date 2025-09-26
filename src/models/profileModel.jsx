@@ -13,16 +13,11 @@ export default function ProfileModal({
 
     if (!open) return null;
 
-    const handleMyPosts = () => {
-        navigate('/my-posts');
+
+        const Dashboard = () => {
+        navigate('/dashboard');
         if (onClose) onClose(); 
     };
-
-        const handleBookMarks = () => {
-        navigate('/bookmarks');
-        if (onClose) onClose(); 
-    };
-
 
     const handleCreatePost = () => {
         if (onCreatePost) onCreatePost();
@@ -44,16 +39,15 @@ export default function ProfileModal({
             </div>
             <div
                 className="py-2 cursor-pointer border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200"
-                onClick={handleMyPosts}
+                onClick= {Dashboard}
+
             >
-                My posts
+                Dashboard
             </div>
             <div
                 className="py-2 cursor-pointer border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200"
-                onClick= {handleBookMarks}
-
             >
-                Book marks
+                Settings
             </div>
 
             <div className="border-t border-gray-200 mt-2 mb-2" />

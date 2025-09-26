@@ -74,13 +74,13 @@ const HeaderLoggedin = ({ user,handleLogout }) => {
 
             {/* Profile Avatar + Modal */}
             <div ref={profileRef} className="relative">
-<img
-  src={user?.id ? `http://localhost:8081/api/auth/user/${user.id}/profile-image` : defaultAvator}
-  alt="User Avatar"
-  className="w-8 h-8 rounded-full cursor-pointer"
-  onClick={toggleProfile}
-  onError={(e) => { e.target.src = defaultAvator; }}
-/>
+              <img
+              src={user?.id ? `http://localhost:8081/api/auth/user/${user.id}/profile-image` : defaultAvator}
+              alt="User Avatar"
+              className="w-8 h-8 rounded-full cursor-pointer"
+              onClick={toggleProfile}
+              onError={(e) => { e.target.src = defaultAvator; }}
+              />
               <ProfileModal
                 open={isProfileOpen}
                 onClose={() => setIsProfileOpen(false)}

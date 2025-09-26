@@ -1,10 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { MessageCircle, Bookmark, Heart, Send } from 'lucide-react';
 import defaultAvatar from '../assets/default.png';
 import { likesAPI, commentsAPI } from '../services/api';
 import {BookmarkButton} from './BookMark';
 
-const PostCard = ({ post, currentUserId, isInitiallyBookmarked = false, onBookmarkChange }) => {
+const PostCard = ({ 
+  post, 
+  currentUserId, 
+  isInitiallyBookmarked = false, 
+  onBookmarkChange,
+  customActions = null,
+  showMyPostsMode = false 
+}) => {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [comments, setComments] = useState([]);
@@ -46,11 +53,11 @@ const PostCard = ({ post, currentUserId, isInitiallyBookmarked = false, onBookma
   useEffect(() => {
     if (post.postId) {
       fetchPostStats();
-      if (currentUserId) {
+      if (currentUserId && !showMyPostsMode) {
         checkBookmarkStatus();
       }
     }
-  }, [post.postId, currentUserId]);
+  }, [post.postId, currentUserId, showMyPostsMode]);
 
   useEffect(() => {
     setIsBookmarked(isInitiallyBookmarked);
@@ -94,7 +101,7 @@ const PostCard = ({ post, currentUserId, isInitiallyBookmarked = false, onBookma
     e.preventDefault();
     e.stopPropagation();
     
-    if (!currentUserId || loading) return;
+    if (!currentUserId || loading || showMyPostsMode) return;
 
     try {
       setLoading(true);
@@ -112,6 +119,8 @@ const PostCard = ({ post, currentUserId, isInitiallyBookmarked = false, onBookma
   };
 
   const handleCommentClick = () => {
+    if (showMyPostsMode) return; // Disabling comments in MyPosts mode
+    
     if (!showComments) {
       fetchComments();
     }
@@ -120,7 +129,7 @@ const PostCard = ({ post, currentUserId, isInitiallyBookmarked = false, onBookma
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
-    if (!newComment.trim() || !currentUserId || submittingComment) return;
+    if (!newComment.trim() || !currentUserId || submittingComment || showMyPostsMode) return;
 
     try {
       setSubmittingComment(true);
@@ -228,7 +237,7 @@ const PostCard = ({ post, currentUserId, isInitiallyBookmarked = false, onBookma
             <span className="font-medium text-gray-900 hover:text-blue-600 cursor-pointer">
               {post.user?.name || post.author?.name || 'Anonymous'}
             </span>
-            <span>•</span>
+            <span>â€¢</span>
             <span>{formatDate(post.createdAt || post.date)}</span>
           </div>
         </div>
@@ -275,49 +284,72 @@ const PostCard = ({ post, currentUserId, isInitiallyBookmarked = false, onBookma
 
         {/* Stats and Actions */}
         <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
-          <div className="flex items-center space-x-4">
-            <button 
-              onClick={handleLikeToggle}
-              disabled={!currentUserId || loading}
-              className={`flex items-center space-x-1 px-2 py-1 rounded transition-all duration-200 ${
-                isLiked 
-                  ? 'text-red-600 bg-red-50 hover:bg-red-100' 
-                  : 'hover:bg-gray-50 hover:text-red-600'
-              } ${!currentUserId ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
-            >
-              <Heart 
-                className={`w-4 h-4 transition-all duration-200 ${
-                  isLiked ? 'fill-current text-red-600' : ''
-                }`} 
-              />
-              <span className="font-medium">
-                {likeCount > 0 ? likeCount : 'Like'}
-              </span>
-            </button>
+          {!showMyPostsMode ? (
+            // Normal mode - shows likes, comments, bookmarks
+            <>
+              <div className="flex items-center space-x-4">
+                <button 
+                  onClick={handleLikeToggle}
+                  disabled={!currentUserId || loading}
+                  className={`flex items-center space-x-1 px-2 py-1 rounded transition-all duration-200 ${
+                    isLiked 
+                      ? 'text-red-600 bg-red-50 hover:bg-red-100' 
+                      : 'hover:bg-gray-50 hover:text-red-600'
+                  } ${!currentUserId ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+                >
+                  <Heart 
+                    className={`w-4 h-4 transition-all duration-200 ${
+                      isLiked ? 'fill-current text-red-600' : ''
+                    }`} 
+                  />
+                  <span className="font-medium">
+                    {likeCount > 0 ? likeCount : 'Like'}
+                  </span>
+                </button>
 
-            <button 
-              onClick={handleCommentClick}
-              className="flex items-center space-x-1 hover:bg-gray-50 px-2 py-1 rounded cursor-pointer transition-colors hover:text-blue-600"
-            >
-              <MessageCircle className="w-4 h-4" />
-              <span>
-                {commentCount > 0 ? `${commentCount} Comment${commentCount > 1 ? 's' : ''}` : 'Comment'}
-              </span>
-            </button>
-          </div>
+                <button 
+                  onClick={handleCommentClick}
+                  className="flex items-center space-x-1 hover:bg-gray-50 px-2 py-1 rounded cursor-pointer transition-colors hover:text-blue-600"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>
+                    {commentCount > 0 ? `${commentCount} Comment${commentCount > 1 ? 's' : ''}` : 'Comment'}
+                  </span>
+                </button>
+              </div>
 
-          <div className="flex items-center space-x-3">
-            <BookmarkButton
-              postId={post.postId} 
-              userId={currentUserId} 
-              isInitiallyBookmarked={isBookmarked}
-              onBookmarkChange={handleBookmarkChange}
-            />
-          </div>
+              <div className="flex items-center space-x-3">
+                <BookmarkButton
+                  postId={post.postId} 
+                  userId={currentUserId} 
+                  isInitiallyBookmarked={isBookmarked}
+                  onBookmarkChange={handleBookmarkChange}
+                />
+              </div>
+            </>
+          ) : (
+            // MyPosts mode - shows stats and custom actions
+            <>
+              <div className="flex items-center space-x-4">
+                <span className="text-gray-500">{likeCount} likes</span>
+                <span className="text-gray-500">{commentCount} comments</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                {customActions}
+              </div>
+            </>
+          )}
         </div>
+        
+        {/* Additional info for MyPosts mode */}
+        {showMyPostsMode && (
+          <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-100">
+            <span>Updated {formatDate(post.updatedAt || post.createdAt)}</span>
+          </div>
+        )}
 
-        {/* Comments */}
-        {showComments && (
+        {/* Comments - only shows in normal mode */}
+        {showComments && !showMyPostsMode && (
           <div className="border-t border-gray-100 pt-4">
             {comments.length > 0 && (
               <div className="space-y-3 mb-4">
@@ -407,7 +439,7 @@ const PostCard = ({ post, currentUserId, isInitiallyBookmarked = false, onBookma
           </div>
         )}
 
-        {!currentUserId && (
+        {!currentUserId && !showMyPostsMode && (
           <div className="mt-3 text-xs text-gray-500">
             <span>Please log in to like and comment on posts</span>
           </div>
