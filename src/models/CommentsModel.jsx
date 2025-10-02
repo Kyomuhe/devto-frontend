@@ -8,8 +8,7 @@ const CommentsModal = ({
   isOpen, 
   onClose, 
   postId, 
-  currentUserId, 
-  postTitle 
+  currentUserId 
 }) => {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
@@ -118,7 +117,7 @@ const CommentsModal = ({
                   <img
                     src={
                       comment.user?.id 
-                        ? `http://localhost:8081/api/auth/user/${comment.user.id}/profile-image`
+                        ? `http://localhost:8081/api/v1/auth/user/${comment.user.id}/profile-image`
                         : defaultAvatar
                     }
                     alt={comment.user?.name || 'User'}
@@ -172,7 +171,7 @@ const CommentsModal = ({
             <img
               src={
                 currentUserId 
-                  ? `http://localhost:8081/api/auth/user/${currentUserId}/profile-image`
+                  ? `http://localhost:8081/api/v1/auth/user/${currentUserId}/profile-image`
                   : defaultAvatar
               }
               alt="Your avatar"

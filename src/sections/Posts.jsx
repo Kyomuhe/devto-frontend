@@ -9,10 +9,10 @@ const CenterContent = () => {
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:8081/posts/display')
+    fetch('http://localhost:8081/api/v1/posts/display')
       .then(res => res.json())
       .then(data => {
-        // ✅ Sort newest first
+        // Sort newest first
         const sorted = data.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );

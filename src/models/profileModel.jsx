@@ -14,7 +14,7 @@ export default function ProfileModal({
     if (!open) return null;
 
 
-        const Dashboard = () => {
+    const Dashboard = () => {
         navigate('/dashboard');
         if (onClose) onClose(); 
     };

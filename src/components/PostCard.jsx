@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MessageCircle, Bookmark, Heart, Send } from 'lucide-react';
+import { MessageCircle, Heart, Send } from 'lucide-react';
 import defaultAvatar from '../assets/default.png';
 import { likesAPI, commentsAPI } from '../services/api';
 import {BookmarkButton} from './BookMark';
@@ -24,13 +24,12 @@ const PostCard = ({
   const [showFullDescription, setShowFullDescription] = useState(false);
   
   const [isBookmarked, setIsBookmarked] = useState(isInitiallyBookmarked);
-  const [bookmarkLoading, setBookmarkLoading] = useState(false);
 
   const checkBookmarkStatus = async () => {
     if (!currentUserId || !post.postId) return;
     
     try {
-      const response = await fetch(`http://localhost:8081/posts/checkBookmark/${currentUserId}/${post.postId}`);
+      const response = await fetch(`http://localhost:8081/api/v1/posts/checkBookmark/${currentUserId}/${post.postId}`);
       if (response.ok) {
         const bookmarkStatus = await response.json();
         setIsBookmarked(bookmarkStatus);
@@ -208,7 +207,7 @@ const PostCard = ({
       {post.coverImage && (
         <div className="aspect-video w-full overflow-hidden">
           <img
-            src={`http://localhost:8081/posts/image/${post.postId}`}
+            src={`http://localhost:8081/api/v1/posts/image/${post.postId}`}
             alt={post.title}
             className="w-full h-full object-cover hover:scale-105 transition-transform duration-200 cursor-pointer"
             onError={(e) => {
@@ -225,7 +224,7 @@ const PostCard = ({
           <img
             src={
               (post.user?.id || post.author?.id) 
-                ? `http://localhost:8081/api/auth/user/${post.user?.id || post.author?.id}/profile-image`
+                ? `http://localhost:8081/api/v1/auth/user/${post.user?.id || post.author?.id}/profile-image`
                 : defaultAvatar
             }
             alt={post.user?.name || post.author?.name || 'Anonymous'}
@@ -358,7 +357,7 @@ const PostCard = ({
                     <img
                       src={
                         comment.user?.id 
-                          ? `http://localhost:8081/api/auth/user/${comment.user.id}/profile-image`
+                          ? `http://localhost:8081/api/v1/auth/user/${comment.user.id}/profile-image`
                           : defaultAvatar
                       }
                       alt={comment.user?.name || 'User'}
@@ -406,7 +405,7 @@ const PostCard = ({
             {currentUserId ? (
               <form onSubmit={handleCommentSubmit} className="flex space-x-3">
                 <img
-                  src={`http://localhost:8081/api/auth/user/${currentUserId}/profile-image`}
+                  src={`http://localhost:8081/api/v1/auth/user/${currentUserId}/profile-image`}
                   alt="Your avatar"
                   className="w-6 h-6 rounded-full object-cover bg-gray-200 flex-shrink-0 mt-2"
                   onError={(e) => { e.target.src = defaultAvatar; }}

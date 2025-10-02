@@ -19,7 +19,7 @@ const MyPosts = ({ user }) => {
   const fetchUserPosts = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:8081/posts/user/${user.id}`);
+      const response = await fetch(`http://localhost:8081/api/v1/posts/user/${user.id}`);
       if (!response.ok) throw new Error('Failed to fetch posts');
       const userPosts = await response.json();
       setPosts(userPosts);
@@ -35,7 +35,7 @@ const MyPosts = ({ user }) => {
 
   const handleDeletePost = async (postId) => {
     try {
-      const response = await fetch(`http://localhost:8081/posts/delete/${postId}`, {
+      const response = await fetch(`http://localhost:8081/api/v1/posts/delete/${postId}`, {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error('Failed to delete post');

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const MenuPopup = ({ item, position, onClose }) => {
+const MenuPopup = ({ item, position }) => {
   if (!item) return null;
 
   return (

@@ -9,7 +9,7 @@ const OnBoard = ({ onLogout, userToken, user }) => {
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:8081/posts/display')
+    fetch('http://localhost:8081/api/v1/posts/display')
       .then(res => res.json())
       .then(data => {
         // Sort newest first

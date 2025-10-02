@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { 
   X, 
   Bold, 
@@ -31,7 +31,6 @@ const CreatePost = ({ user, existingPost, isEditing = false }) => {
   const [isPublishing, setIsPublishing] = useState(false);
   const [error, setError] = useState('');
   const [hasExistingImage, setHasExistingImage] = useState(false);
-  
   const fileInputRef = useRef(null);
   const titleTextareaRef = useRef(null);
   const contentTextareaRef = useRef(null);

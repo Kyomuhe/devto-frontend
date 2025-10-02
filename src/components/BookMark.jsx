@@ -18,8 +18,8 @@ export const BookmarkButton = ({ postId, userId, isInitiallyBookmarked = false, 
     
     try {
       const endpoint = isBookmarked 
-        ? `http://localhost:8081/posts/unbookmark/${userId}/${postId}`
-        : `http://localhost:8081/posts/bookmark/${userId}/${postId}`;
+        ? `http://localhost:8081/api/v1/posts/unbookmark/${userId}/${postId}`
+        : `http://localhost:8081/api/v1/posts/bookmark/${userId}/${postId}`;
       
       const method = isBookmarked ? 'DELETE' : 'POST';
       
@@ -97,7 +97,7 @@ const BookmarkPage = ({ user }) => {
   const fetchBookmarks = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:8081/posts/displayBookMarks/${user.id}`);
+      const response = await fetch(`http://localhost:8081/api/v1/posts/displayBookMarks/${user.id}`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch bookmarks');

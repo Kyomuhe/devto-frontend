@@ -7,7 +7,7 @@ export const likesAPI = {
     try {
       console.log('API Call: Toggle Like', { postId, userId });
       
-      const response = await fetch(`${API_BASE_URL}/likes/toggle`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/likes/toggle`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -35,7 +35,7 @@ export const likesAPI = {
     try {
       console.log('API Call: Has User Liked Post', { postId, userId });
       
-      const response = await fetch(`${API_BASE_URL}/likes/check/${postId}/${userId}`);
+      const response = await fetch(`${API_BASE_URL}/api/v1/likes/check/${postId}/${userId}`);
       
       console.log('Has user liked response status:', response.status);
       
@@ -57,7 +57,7 @@ export const likesAPI = {
     try {
       console.log('API Call: Get Like Count', { postId });
       
-      const response = await fetch(`${API_BASE_URL}/likes/count/${postId}`);
+      const response = await fetch(`${API_BASE_URL}/api/v1/likes/count/${postId}`);
       
       console.log('Get like count response status:', response.status);
       
@@ -82,7 +82,7 @@ export const commentsAPI = {
     try {
       console.log('API Call: Create Comment', { postId, userId, content });
       
-      const response = await fetch(`${API_BASE_URL}/comments/create`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/comments/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -110,7 +110,7 @@ export const commentsAPI = {
     try {
       console.log('API Call: Get Comments By Post', { postId });
       
-      const response = await fetch(`${API_BASE_URL}/comments/display/${postId}`);
+      const response = await fetch(`${API_BASE_URL}/api/v1/comments/display/${postId}`);
       
       console.log('Get comments response status:', response.status);
       
@@ -132,7 +132,7 @@ export const commentsAPI = {
     try {
       console.log('API Call: Get Comment Count', { postId });
       
-      const response = await fetch(`${API_BASE_URL}/comments/count/${postId}`);
+      const response = await fetch(`${API_BASE_URL}/api/v1/comments/count/${postId}`);
       
       console.log('Get comment count response status:', response.status);
       

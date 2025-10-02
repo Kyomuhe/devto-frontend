@@ -1,40 +1,70 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Apple, Facebook, Github, Chrome, Twitter } from 'lucide-react';
 import logo from '../assets/logo.webp';
+import { makeRequest } from '../utils/util';
+import { toast } from 'sonner';
+
 
 const LoginPage = ({ onLoginSuccess }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8081/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: username,
-          password: password
-        })
-      });
+      console.log("makeRequest")
+      const details = {username, password}
+      const response = await makeRequest("auth/login", details, "Post" )
+      // const response = await fetch('http://localhost:8081/api/auth/logtin', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({
+      //     username: username,
+      //     password: password
+      //   })
+      // });
 
-      const data = await response.json();
+      const data = response;
+      console.log(data)
 
-      if (response.ok) {
+      if (data && data.token) {
+        toast.success('Login successful!');
         localStorage.setItem('authToken', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        console.log("calling onLoginSuccess")
         onLoginSuccess(data);
       } else {
-        setError(data.error || 'Login failed. Please check your credentials.');
+      const errorMessage = data?.error || 'Login failed.';
+      setError(errorMessage);
+      toast.error(errorMessage);
       }
-    } catch (err) {
-      setError('Something went wrong. Please try again.');
+  } catch (err) {
+    console.error("Login error:", err);
+    
+    // Check if it's an axios error with response data
+    let errorMessage = "Something went wrong, please try again";
+    
+    if (err.response && err.response.data && err.response.data.error) {
+      // Backend returned an error message
+      errorMessage = err.response.data.error;
+    } else if (err.message) {
+      errorMessage = err.message;
     }
-  };
-
+    
+    setError(errorMessage);
+    toast.error(errorMessage);
+  } finally {
+    setIsLoading(false);
+  }
+};
+3
   const socialButtons = [
     { icon: Apple, text: 'Continue with Apple', color: 'text-gray-800' },
     { icon: Facebook, text: 'Continue with Facebook', color: 'text-blue-600' },
@@ -56,7 +86,7 @@ const LoginPage = ({ onLoginSuccess }) => {
         {/* Show error */}
         {error && (
           <div className="text-red-600 text-sm font-medium text-center">
-            {error}
+            {error} 
           </div>
         )}
 
