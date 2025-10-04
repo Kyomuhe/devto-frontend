@@ -22,14 +22,6 @@ const LoginPage = ({ onLoginSuccess }) => {
       console.log("makeRequest")
       const details = {username, password}
       const response = await makeRequest("auth/login", details, "Post" )
-      // const response = await fetch('http://localhost:8081/api/auth/logtin', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({
-      //     username: username,
-      //     password: password
-      //   })
-      // });
 
       const data = response;
       console.log(data)
@@ -48,7 +40,7 @@ const LoginPage = ({ onLoginSuccess }) => {
   } catch (err) {
     console.error("Login error:", err);
     
-    // Check if it's an axios error with response data
+    // Checking if it's an axios error with response data
     let errorMessage = "Something went wrong, please try again";
     
     if (err.response && err.response.data && err.response.data.error) {
@@ -76,7 +68,6 @@ const LoginPage = ({ onLoginSuccess }) => {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        {/* Header */}
         <div className="text-center">
           <img className="mx-auto h-12 w-auto" src={logo} alt="DEV Community Logo" />
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>

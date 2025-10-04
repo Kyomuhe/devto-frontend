@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { makeRequest } from '../utils/util';
+import { toast } from 'sonner';
 
 const EmailSignup = ({onSignupSuccess }) => {
   const [formData, setFormData] = useState({
@@ -85,22 +87,17 @@ const signupUser = async (userData) => {
       formData.append('profileImage', userData.profileImage);
     }
 
-    const response = await fetch('http://localhost:8081/api/auth/signup', {
-      method: 'POST',
-      body: formData, 
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || 'Signup failed');
-    }
-
+    const data = await makeRequest('auth/signup', formData, 'Post');
+    
     return data;
   } catch (error) {
-    throw new Error(error.message || 'Network error occurred');
+    // Access error response data if available
+    const errorMessage = error.response?.data?.error || error.message || 'Signup failed';
+    toast.error(errorMessage);
+    throw error;
   }
 };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     

@@ -55,7 +55,7 @@ const CreatePost = ({ user, existingPost, isEditing = false }) => {
       // Checking if existing post has cover image
       if (existingPost.hasCoverImage || existingPost.coverImage) {
         setHasExistingImage(true);
-        setCoverImagePreview(`http://localhost:8081/posts/image/${existingPost.postId}`);
+        setCoverImagePreview(`http://localhost:8081/api/v1/posts/image/${existingPost.postId}`);
       }
     }
   }, [isEditing, existingPost]);
@@ -146,8 +146,8 @@ const CreatePost = ({ user, existingPost, isEditing = false }) => {
       }
 
       const url = isEditing 
-        ? `http://localhost:8081/posts/${existingPost.postId}` 
-        : 'http://localhost:8081/posts/create';
+        ? `http://localhost:8081/api/v1/posts/${existingPost.postId}` 
+        : 'http://localhost:8081/api/v1/posts/create';
       
       const method = isEditing ? 'PUT' : 'POST';
 
@@ -186,7 +186,7 @@ const CreatePost = ({ user, existingPost, isEditing = false }) => {
       setCoverImage(null);
       if (existingPost.hasCoverImage || existingPost.coverImage) {
         setHasExistingImage(true);
-        setCoverImagePreview(`http://localhost:8081/posts/image/${existingPost.postId}`);
+        setCoverImagePreview(`http://localhost:8081/api/v1/posts/image/${existingPost.postId}`);
       } else {
         setCoverImagePreview(null);
         setHasExistingImage(false);

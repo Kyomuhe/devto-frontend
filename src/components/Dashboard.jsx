@@ -24,7 +24,7 @@ const Dashboard = ({ user }) => {
       setLoading(true);
 
       // Fetching posts
-      const postsResponse = await fetch(`http://localhost:8081/posts/user/${user.id}`);
+      const postsResponse = await fetch(`http://localhost:8081/api/v1/posts/user/${user.id}`);
       if (postsResponse.ok) {
         const userPosts = await postsResponse.json();
         setStats((prev) => ({ ...prev, totalPosts: userPosts.length }));
@@ -152,7 +152,7 @@ const Dashboard = ({ user }) => {
                   {post.coverImage && (
                     <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
                       <img
-                        src={`http://localhost:8081/posts/image/${post.postId}`}
+                        src={`http://localhost:8081/api/v1/posts/image/${post.postId}`}
                         alt={post.title}
                         className="w-full h-full object-cover"
                       />
