@@ -19,20 +19,18 @@ const LoginPage = ({ onLoginSuccess }) => {
     setIsLoading(true);
 
     try {
-      console.log("makeRequest")
       const details = {username, password}
       const response = await makeRequest("auth/login", details, "Post" )
 
       const data = response;
-      console.log(data)
 
       if (data && data.token) {
         toast.success('Login successful!');
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
-        console.log("calling onLoginSuccess")
         onLoginSuccess(data);
-      } else {
+      } 
+      else {
       const errorMessage = data?.error || 'Login failed.';
       setError(errorMessage);
       toast.error(errorMessage);

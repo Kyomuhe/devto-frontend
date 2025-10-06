@@ -91,7 +91,7 @@ const signupUser = async (userData) => {
     
     return data;
   } catch (error) {
-    // Access error response data if available
+    // Accessing error response data if available
     const errorMessage = error.response?.data?.error || error.message || 'Signup failed';
     toast.error(errorMessage);
     throw error;

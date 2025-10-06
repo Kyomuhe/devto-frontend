@@ -28,7 +28,7 @@ const AppContent = () => {
     
     if (token && savedUser) {
       try {
-        //If both exist, parse the user JSON string back to an object
+        //If both exist, parsing the user JSON string back to an object
         const parsedUser = JSON.parse(savedUser);
         setUserToken(token);
         setUser(parsedUser);
@@ -74,7 +74,6 @@ const AppContent = () => {
     const token = loginResult.token;
     const userData = loginResult.user;
     
-    // Store both token and user in localStorage
     localStorage.setItem('authToken', token);
     localStorage.setItem('user', JSON.stringify(userData));
     

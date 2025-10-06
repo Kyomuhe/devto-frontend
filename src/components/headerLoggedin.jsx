@@ -88,7 +88,6 @@ const HeaderLoggedin = ({ user,handleLogout }) => {
                 username={user?.username || "unknown"}
                 onDashboard={() => navigate("/dashboard")}
                 onCreatePost={() => navigate("/create-post")}
-                onReadingList={() => navigate("/reading-list")}
                 onSettings={() => navigate("/settings")}
                 onSignOut={() => {
                   handleLogout();
