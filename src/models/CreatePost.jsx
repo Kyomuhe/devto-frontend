@@ -223,7 +223,6 @@ const CreatePost = ({ user, existingPost, isEditing = false }) => {
 
   return (
     <div className="fixed inset-0 bg-white z-50 flex flex-col">
-      {/* Hidden file input */}
       <input
         type="file"
         ref={fileInputRef}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Plus, MoreHorizontal } from 'lucide-react';
 import MenuPopup from '../models/MenuPopup';
 
@@ -20,7 +20,7 @@ const SideMenu = ({ menuItems = [] }) => {
   };
 
   return (
-    <div className="fixed left-0 top-0 h-full w-16 bg-gray-100 border-r border-gray-200 z-40 group">
+    <div className="fixed left-0 top-0 h-full w-14 bg-gray-100 border-r border-gray-200 z-40 group">
       {/* Scrollable container */}
       <div className="
         h-full 

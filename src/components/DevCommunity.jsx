@@ -1,5 +1,3 @@
-import React from "react";
-
 const DevCommunity = () => {
     return (
     <div className="flex items-start w-80 p-3">

@@ -23,7 +23,6 @@ const BuildProfile = ({ onContinue, currentStep = 1, totalSteps = 5 }) => {
   };
 
   const handleImageEdit = () => {
-    // Handling profile image editing
     console.log('Edit profile image clicked');
   };
 
@@ -110,7 +109,6 @@ const BuildProfile = ({ onContinue, currentStep = 1, totalSteps = 5 }) => {
 
         {/* Progress and Continue */}
         <div className="mt-8 flex items-center justify-between">
-          {/* Progress Dots */}
           <div className="flex space-x-2">
             {[...Array(totalSteps)].map((_, index) => (
               <div

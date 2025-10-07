@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { FileText, Bookmark, Users, BarChart3, Menu, X, Plus, ArrowLeft} from "lucide-react";
 import defaultAvatar from "../assets/default.png";
@@ -16,7 +16,6 @@ const DashboardLayout = ({ user }) => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"

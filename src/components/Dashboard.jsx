@@ -34,7 +34,7 @@ const Dashboard = ({ user }) => {
       // Placeholder values
       setStats((prev) => ({
         ...prev,
-        totalViews: 134,
+        totalViews: 13,
         totalFollowers: 6,
         totalBookmarks: 3,
       }));

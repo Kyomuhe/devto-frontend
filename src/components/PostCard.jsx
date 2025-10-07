@@ -22,7 +22,6 @@ const PostCard = ({
   const [loading, setLoading] = useState(false);
   const [submittingComment, setSubmittingComment] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
-  
   const [isBookmarked, setIsBookmarked] = useState(isInitiallyBookmarked);
 
   const checkBookmarkStatus = async () => {

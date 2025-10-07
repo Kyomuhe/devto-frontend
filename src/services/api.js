@@ -79,9 +79,7 @@ export const likesAPI = {
 export const commentsAPI = {
   // Create a new comment
   createComment: async (postId, userId, content) => {
-    try {
-      console.log('API Call: Create Comment', { postId, userId, content });
-      
+    try {      
       const response = await fetch(`${API_BASE_URL}/api/v1/comments/create`, {
         method: 'POST',
         headers: {

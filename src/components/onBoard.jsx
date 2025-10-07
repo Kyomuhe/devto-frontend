@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { X, ChevronRight } from 'lucide-react';
 import logo from '../assets/logo.webp'
 import PostCard from './PostCard';
 
-const OnBoard = ({ onLogout, userToken, user }) => {
+const OnBoard = ({ user }) => {
   const [inputValue, setInputValue] = useState('');
   const [showWelcome, setShowWelcome] = useState(true);
   const [posts, setPosts] = useState([]);
