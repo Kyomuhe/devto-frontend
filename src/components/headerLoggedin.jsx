@@ -1,11 +1,15 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo} from 'react';
 import { Search, Menu, X, Bell } from 'lucide-react';
 import logo from '../assets/logo.webp';
 import { useNavigate } from "react-router-dom";
 import ProfileModal from '../models/profileModel';
 import defaultAvator from '../assets/default.png';
 
-const HeaderLoggedin = ({ user,handleLogout }) => {
+const HeaderLoggedin = ({ handleLogout }) => {
+const user = useMemo(() => {
+  return JSON.parse(localStorage.getItem('user'));
+})  
+
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -75,7 +79,7 @@ const HeaderLoggedin = ({ user,handleLogout }) => {
             {/* Profile Avatar + Modal */}
             <div ref={profileRef} className="relative">
               <img
-              src={user?.id ? `http://localhost:8081/api/v1/auth/user/${user.id}/profile-image` : defaultAvator}
+              src={user?.id ? `data:image/png;base64,${user?.profileImage}` : defaultAvator}
               alt="User Avatar"
               className="w-8 h-8 rounded-full cursor-pointer"
               onClick={toggleProfile}

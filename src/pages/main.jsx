@@ -1,4 +1,3 @@
-import React from 'react';
 import Header from '../components/header';
 import SideMenu from '../components/sideMenu';
 import sampleMenuItems from '../data/sampleData';

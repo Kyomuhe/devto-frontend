@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 
 const SpecialInitiatives = ({ onContinue, onBack, currentStep = 3, totalSteps = 5 }) => {
@@ -39,7 +39,6 @@ const SpecialInitiatives = ({ onContinue, onBack, currentStep = 3, totalSteps = 
   return (
   <div className="min-h-screen bg-gradient-to-br from-indigo-200 via-purple-200 to-indigo-300 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-8">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
             Special Initiatives

@@ -1,9 +1,7 @@
 import axios from "axios"
 import { serverUrl } from "../config/config"
-import { Toaster as Sonner, toast } from "sonner"
-
-
-
+// import { Toaster as Sonner, toast } from "sonner"
+import { toast } from "sonner"
 export const makeRequest = async (endpoint, data, method) => {
     console.log(method)
     let response
@@ -11,23 +9,14 @@ export const makeRequest = async (endpoint, data, method) => {
         let url = serverUrl + endpoint
         console.log(url)
         
-        // Check if data is FormData
-        const isFormData = data instanceof FormData;
-        
-        const requestData = isFormData ? data : JSON.stringify(data);
+        const requestData = JSON.stringify(data);
         
         let config = {
             timeout: 4000
         }
-        
-        // Only set Content-Type for JSON requests
-        if (!isFormData) {
             config.headers = { 'Content-Type': 'application/json' };
-        }
         
-        console.log('Is FormData:', isFormData); 
-        console.log('Request data:', requestData); 
-        
+                
         switch(method) {
             case "Post": 
                 response = await axios.post(url, requestData, config)
@@ -61,7 +50,18 @@ export const makeRequest = async (endpoint, data, method) => {
 }
 
 //toast
-export const showToast = (message, type = "sucess") => {
-    return toast(message )
+export const showToast = {
+    success: (message) => {
+        toast.success(message, {
+            duration: 4000,
+            style: {background: '#22c55e', color: '#fff'}
+        });
+    },
 
+    error: (message) =>{
+        toast.error(message, {
+            duration: 4000,
+            style: {background: '#ef4444', color: '#fff'}
+        })
+    }
 }

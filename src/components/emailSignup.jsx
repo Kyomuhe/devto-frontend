@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { makeRequest } from '../utils/util';
+import { makeRequest, showToast } from '../utils/util';
 import { toast } from 'sonner';
 
 const EmailSignup = ({onSignupSuccess }) => {
   const [formData, setFormData] = useState({
-    profileImage: null,
+    profileImage: '',
     name: '',
     username: '',
     email: '',
@@ -15,6 +15,7 @@ const EmailSignup = ({onSignupSuccess }) => {
   const [errors, setErrors] = useState({});
   const [captchaVerified, setCaptchaVerified] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [image, setImage] = useState("");
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -33,11 +34,32 @@ const EmailSignup = ({onSignupSuccess }) => {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
+    getBase64(file)
     setFormData(prev => ({
       ...prev,
-      profileImage: file
+      profileImage:file,
+      
+
     }));
   };
+
+  function getBase64(file) {
+    let base64String = '';
+   var reader = new FileReader();
+
+   reader.readAsDataURL(file);
+   reader.onload = function () {
+    base64String = reader.result.split(",")[1]
+    setImage(base64String)
+     console.log(base64String);
+
+   };   
+   reader.onerror = function (error) {
+     console.log('Error: ', error);
+   };
+   return base64String;
+}
+ 
 
   const validateForm = () => {
     const newErrors = {};
@@ -78,22 +100,35 @@ const EmailSignup = ({onSignupSuccess }) => {
 
 const signupUser = async (userData) => {
   try {
-    const formData = new FormData();
-    formData.append('username', userData.username);
-    formData.append('email', userData.email);
-    formData.append('password', userData.password);
-    formData.append('name', userData.name);
-    if (userData.profileImage) {
-      formData.append('profileImage', userData.profileImage);
+    // const formData = new FormData();
+    // formData.append('username', userData.username);
+    // formData.append('email', userData.email);
+    // formData.append('password', userData.password);
+    // formData.append('name', userData.name);
+    // if (userData.profileImage) {
+    //   formData.append('profileImage', userData.profileImage);
+    // }
+    const newData = {
+      username: userData.username,
+      email: userData.email,
+      password: userData.password,
+      name: userData.name,
+      profileImage: image
+    }
+    console.log(newData)
+
+    const data = await makeRequest('auth/signup', newData, 'Post');
+
+    if (data && data.token){
+    localStorage.setItem("authtoken", data.token)
+    localStorage.setItem("user", JSON.stringify(data.user))
     }
 
-    const data = await makeRequest('auth/signup', formData, 'Post');
-    
     return data;
   } catch (error) {
     // Accessing error response data if available
     const errorMessage = error.response?.data?.error || error.message || 'Signup failed';
-    toast.error(errorMessage);
+    showToast.error(errorMessage);
     throw error;
   }
 };
@@ -121,7 +156,7 @@ const signupUser = async (userData) => {
       
     } catch (error) {
       setErrors({
-        submit: error.message
+        submit: error.message,
       });
     } finally {
       setIsLoading(false);

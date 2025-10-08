@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Apple, Facebook, Github, Chrome, Twitter } from 'lucide-react';
 import logo from '../assets/logo.webp';
-import { makeRequest } from '../utils/util';
+import { makeRequest, showToast } from '../utils/util';
 import { toast } from 'sonner';
 
 
@@ -25,7 +25,7 @@ const LoginPage = ({ onLoginSuccess }) => {
       const data = response;
 
       if (data && data.token) {
-        toast.success('Login successful!');
+        showToast.success('Login successful!');
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         onLoginSuccess(data);
@@ -33,7 +33,7 @@ const LoginPage = ({ onLoginSuccess }) => {
       else {
       const errorMessage = data?.error || 'Login failed.';
       setError(errorMessage);
-      toast.error(errorMessage);
+      showToast.error(errorMessage);
       }
   } catch (err) {
     console.error("Login error:", err);
@@ -49,7 +49,7 @@ const LoginPage = ({ onLoginSuccess }) => {
     }
     
     setError(errorMessage);
-    toast.error(errorMessage);
+    showToast.error(errorMessage);
   } finally {
     setIsLoading(false);
   }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { X, Send } from 'lucide-react';
 import { commentsAPI } from '../services/api';
 import defaultAvatar from '../assets/default.png';
@@ -14,6 +14,9 @@ const CommentsModal = ({
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [showAllComments, setShowAllComments] = useState(false);
+  const user = useMemo(() => {
+    return JSON.parse(localStorage.getItem('user'));
+  })
 
   useEffect(() => {
     if (isOpen && postId) {

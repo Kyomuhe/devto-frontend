@@ -1,11 +1,14 @@
-import { useState } from "react";
+import { useState, useMemo} from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { FileText, Bookmark, Users, BarChart3, Menu, X, Plus, ArrowLeft} from "lucide-react";
 import defaultAvatar from "../assets/default.png";
 
-const DashboardLayout = ({ user }) => {
+const DashboardLayout = () => {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const user = useMemo(() => {
+    return JSON.parse(localStorage.getItem('user'));
+  })
 
   const sidebarItems = [
     { icon: FileText, label: "My Posts", path: "/my-posts", color: "text-blue-600" },
@@ -55,7 +58,7 @@ const DashboardLayout = ({ user }) => {
             <img
               src={
                 user?.id
-                  ? `http://localhost:8081/api/v1/auth/user/${user.id}/profile-image`
+                  ?  `data:image/png;base64,${user?.profileImage}`
                   : defaultAvatar
               }
               alt={user?.Name || "User"}
@@ -120,5 +123,4 @@ const DashboardLayout = ({ user }) => {
     </div>
   );
 };
-
 export default DashboardLayout;
