@@ -1,166 +1,262 @@
-import { useState } from 'react';
+// import { useState } from 'react';
 import { makeRequest, showToast } from '../utils/util';
+import { useFormik } from 'formik';
+//import { use } from 'react';
+import * as Yup from 'yup';
 
 const EmailSignup = ({onSignupSuccess }) => {
-  const [formData, setFormData] = useState({
-    profileImage: '',
-    name: '',
-    username: '',
-    email: '',
-    password: '',
-    passwordConfirmation: ''
-  });
 
-  const [errors, setErrors] = useState({});
-  const [captchaVerified, setCaptchaVerified] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [image, setImage] = useState("");
+  const validationSchema = Yup.object().shape(
+    {
+      name: Yup.string()
+      .trim()
+      .required('Name is required'),
+      username: Yup.string()
+      .trim()
+      .min(6, 'username must be at least 6 characters ')
+      .required('username is required'),
+      email: Yup.string()
+      .trim()
+      .email('Invalid email format')
+      .required('Email is required'),
+      password: Yup.string()
+      .min(8, 'Password must be at least 8 characters ')
+      .required('Password is required'),
+      passwordConfirmation: Yup.string()
+      .oneOf([Yup.ref('password'), null], 'Passwords must match')
+      .required('Password confirmation is required'),
+      profileImage: Yup.mixed()
+      .nullable(),
+      captcha: Yup.boolean()
+      .oneOf([true], 'Please verify that you are not a robot')
+      .required('Captcha verification is required') 
 
-  const handleInputChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-    
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({
-        ...prev,
-        [field]: ''
-      }));
     }
+  );
+
+  const formik = useFormik(
+    {
+      initialValues:{
+        profileImage: null,
+        name: '',
+        username: '',
+        email: '',
+        password: '',
+        passwordConfirmation: '',
+        captcha: false
+
+      },
+      validationSchema: validationSchema,
+      onSubmit: async (values, {setSubmitting, setFieldError}) =>{
+        try{
+          let base64Image = '';
+          if (values.profileImage) {
+            base64Image = await getBase64(values.profileImage);
+          }
+          const userData = {
+            name: values.name,
+            username: values.username,
+            email: values.email,
+            password: values.password,
+            profileImage: base64Image
+          };
+          console.log(userData);
+
+          const data = await makeRequest('auth/signup', userData, 'Post');
+
+          if (data && data.token){
+            showToast.success('Signup successful!');
+            localStorage.setItem("authtoken", data.token)
+            localStorage.setItem("user", JSON.stringify(data.user))
+            if (onSignupSuccess){
+              onSignupSuccess(data);
+            }
+          }
+
+
+        }catch (error){
+          const errorMessage = error.response?.data?.error || error.message || 'signup failed';
+          setFieldError('general', errorMessage);
+          showToast.error(errorMessage);
+        }finally {
+          setSubmitting(false);
+        }
+    }
+});
+
+//   function getBase64(file) {
+//     let base64String = '';
+//    var reader = new FileReader();
+
+//    reader.readAsDataURL(file);
+//    reader.onload = function () {
+//     base64String = reader.result.split(",")[1]
+//     setImage(base64String)
+//      console.log(base64String);
+
+//    };   
+//    reader.onerror = function (error) {
+//      console.log('Error: ', error);
+//    };
+//    return base64String;
+// }
+
+  const getBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        const base64String = reader.result.split(",")[1];
+        resolve(base64String);
+      };
+      reader.onerror = (error) => {
+        console.error('Error: ', error);
+        reject(error);
+      };
+    });
   };
+
+
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    getBase64(file)
-    setFormData(prev => ({
-      ...prev,
-      profileImage:file,
-      
-
-    }));
+    formik.setFieldValue('profileImage', file);
   };
 
-  function getBase64(file) {
-    let base64String = '';
-   var reader = new FileReader();
 
-   reader.readAsDataURL(file);
-   reader.onload = function () {
-    base64String = reader.result.split(",")[1]
-    setImage(base64String)
-     console.log(base64String);
 
-   };   
-   reader.onerror = function (error) {
-     console.log('Error: ', error);
-   };
-   return base64String;
-}
+  // const [formData, setFormData] = useState({
+  //   profileImage: '',
+  //   name: '',
+  //   username: '',
+  //   email: '',
+  //   password: '',
+  //   passwordConfirmation: ''
+  // });
+
+  // const [errors, setErrors] = useState({});
+  // const [captchaVerified, setCaptchaVerified] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
+  // const [image, setImage] = useState("");
+
+  // const handleInputChange = (field, value) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     [field]: value
+  //   }));
+    
+  //   // Clear error when user starts typing
+  //   if (errors[field]) {
+  //     setErrors(prev => ({
+  //       ...prev,
+  //       [field]: ''
+  //     }));
+  //   }
+  // };
+
  
 
-  const validateForm = () => {
-    const newErrors = {};
+  // const validateForm = () => {
+  //   const newErrors = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
-    }
+  //   if (!formData.name.trim()) {
+  //     newErrors.name = 'Name is required';
+  //   }
 
-    if (!formData.username.trim()) {
-      newErrors.username = 'Username is required';
-    }
+  //   if (!formData.username.trim()) {
+  //     newErrors.username = 'Username is required';
+  //   }
 
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
-    }
+  //   if (!formData.email.trim()) {
+  //     newErrors.email = 'Email is required';
+  //   } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+  //     newErrors.email = 'Email is invalid';
+  //   }
 
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
-    }
+  //   if (!formData.password) {
+  //     newErrors.password = 'Password is required';
+  //   } else if (formData.password.length < 8) {
+  //     newErrors.password = 'Password must be at least 8 characters';
+  //   }
 
-    if (!formData.passwordConfirmation) {
-      newErrors.passwordConfirmation = 'Password confirmation is required';
-    } else if (formData.password !== formData.passwordConfirmation) {
-      newErrors.passwordConfirmation = 'Passwords do not match';
-    }
+  //   if (!formData.passwordConfirmation) {
+  //     newErrors.passwordConfirmation = 'Password confirmation is required';
+  //   } else if (formData.password !== formData.passwordConfirmation) {
+  //     newErrors.passwordConfirmation = 'Passwords do not match';
+  //   }
 
-    if (!captchaVerified) {
-      newErrors.captcha = 'Please verify that you are not a robot';
-    }
+  //   if (!captchaVerified) {
+  //     newErrors.captcha = 'Please verify that you are not a robot';
+  //   }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  //   setErrors(newErrors);
+  //   return Object.keys(newErrors).length === 0;
+  // };
 
-const signupUser = async (userData) => {
-  try {
-    // const formData = new FormData();
-    // formData.append('username', userData.username);
-    // formData.append('email', userData.email);
-    // formData.append('password', userData.password);
-    // formData.append('name', userData.name);
-    // if (userData.profileImage) {
-    //   formData.append('profileImage', userData.profileImage);
-    // }
-    const newData = {
-      username: userData.username,
-      email: userData.email,
-      password: userData.password,
-      name: userData.name,
-      profileImage: image
-    }
-    console.log(newData)
+// const signupUser = async (userData) => {
+//   try {
+//     // const formData = new FormData();
+//     // formData.append('username', userData.username);
+//     // formData.append('email', userData.email);
+//     // formData.append('password', userData.password);
+//     // formData.append('name', userData.name);
+//     // if (userData.profileImage) {
+//     //   formData.append('profileImage', userData.profileImage);
+//     // }
+//     const newData = {
+//       username: userData.username,
+//       email: userData.email,
+//       password: userData.password,
+//       name: userData.name,
+//       profileImage: image
+//     }
+//     console.log(newData)
 
-    const data = await makeRequest('auth/signup', newData, 'Post');
+//     const data = await makeRequest('auth/signup', newData, 'Post');
 
-    if (data && data.token){
-    localStorage.setItem("authtoken", data.token)
-    localStorage.setItem("user", JSON.stringify(data.user))
-    }
+//     if (data && data.token){
+//     localStorage.setItem("authtoken", data.token)
+//     localStorage.setItem("user", JSON.stringify(data.user))
+//     }
 
-    return data;
-  } catch (error) {
-    // Accessing error response data if available
-    const errorMessage = error.response?.data?.error || error.message || 'Signup failed';
-    showToast.error(errorMessage);
-    throw error;
-  }
-};
+//     return data;
+//   } catch (error) {
+//     // Accessing error response data if available
+//     const errorMessage = error.response?.data?.error || error.message || 'Signup failed';
+//     showToast.error(errorMessage);
+//     throw error;
+//   }
+// };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
     
-    if (!validateForm()) {
-      return;
-    }
+//     if (!validateForm()) {
+//       return;
+//     }
 
-    setIsLoading(true);
-    setErrors({});
+//     setIsLoading(true);
+//     setErrors({});
 
-    try {
-      const result = await signupUser(formData);
+//     try {
+//       const result = await signupUser(formData);
       
-      // Storing the JWT token in localStorage
-      localStorage.setItem('authToken', result.token);
+//       // Storing the JWT token in localStorage
+//       localStorage.setItem('authToken', result.token);
       
-      //  triggers navigation to SignupFlow
-      if (onSignupSuccess) {
-        onSignupSuccess(result);
-      }
+//       //  triggers navigation to SignupFlow
+//       if (onSignupSuccess) {
+//         onSignupSuccess(result);
+//       }
       
-    } catch (error) {
-      setErrors({
-        submit: error.message,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+//     } catch (error) {
+//       setErrors({
+//         submit: error.message,
+//       });
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -171,11 +267,11 @@ const signupUser = async (userData) => {
           </h1>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={formik.handleSubmit} className="space-y-6">
           {/* Show general error message */}
-          {errors.submit && (
+          {formik.errors.submit && (
             <div className="bg-red-50 border border-red-200 rounded-md p-4">
-              <p className="text-sm text-red-600">{errors.submit}</p>
+              <p className="text-sm text-red-600">{formik.errors.general}</p>
             </div>
           )}
 
@@ -186,24 +282,28 @@ const signupUser = async (userData) => {
             <div className="flex items-center space-x-3">
               <input
                 type="file"
+                name="profileImage"
                 accept="image/*"
                 onChange={handleFileChange}
                 className="hidden"
                 id="profile-image"
-                disabled={isLoading}
+                disabled={formik.isSubmitting}
               />
               <label
                 htmlFor="profile-image"
                 className={`bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded cursor-pointer transition-colors duration-200 ${
-                  isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                  formik.isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
                 Browse...
               </label>
               <span className="text-sm text-gray-500">
-                {formData.profileImage ? formData.profileImage.name : 'No file selected.'}
+                {formik.values.profileImage ? formik.values.profileImage.name : 'No file selected.'}
               </span>
             </div>
+            {formik.touched.profileImage && formik.errors.profileImage && (
+              <p className="mt-1 text-sm text-red-600">{formik.errors.profileImage}</p>
+            )}
           </div>
 
           <div>
@@ -212,15 +312,17 @@ const signupUser = async (userData) => {
             </label>
             <input
               type="text"
-              value={formData.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
-              disabled={isLoading}
+              name ="name"
+              value={formik.values.name}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              disabled={formik.isSubmitting}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.name ? 'border-red-500' : 'border-gray-300'
-              } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                formik.touched.name && formik.errors.name ? 'border-red-500' : 'border-gray-300'
+              } ${formik.isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
             />
-            {errors.name && (
-              <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+            {formik.touched.name && formik.errors.name && (
+              <p className="mt-1 text-sm text-red-600">{formik.errors.name}</p>
             )}
           </div>
 
@@ -230,15 +332,17 @@ const signupUser = async (userData) => {
             </label>
             <input
               type="text"
-              value={formData.username}
-              onChange={(e) => handleInputChange('username', e.target.value)}
-              disabled={isLoading}
+              name ="username"
+              value={formik.values.username}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              disabled={formik.isSubmitting}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.username ? 'border-red-500' : 'border-gray-300'
-              } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                formik.touched.username && formik.errors.username ? 'border-red-500' : 'border-gray-300'
+              } ${formik.isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
             />
-            {errors.username && (
-              <p className="mt-1 text-sm text-red-600">{errors.username}</p>
+            {formik.touched.username && formik.errors.username && (
+              <p className="mt-1 text-sm text-red-600">{formik.errors.username}</p>
             )}
           </div>
 
@@ -248,15 +352,17 @@ const signupUser = async (userData) => {
             </label>
             <input
               type="email"
-              value={formData.email}
-              onChange={(e) => handleInputChange('email', e.target.value)}
-              disabled={isLoading}
+              name ="email"
+              value={formik.values.email}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              disabled={formik.isSubmitting}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.email ? 'border-red-500' : 'border-gray-300'
-              } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                formik.touched.email && formik.errors.email ? 'border-red-500' : 'border-gray-300'
+              } ${formik.isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
             />
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+            {formik.touched.email && formik.errors.email && (
+              <p className="mt-1 text-sm text-red-600">{formik.errors.email}</p>
             )}
           </div>
 
@@ -266,15 +372,17 @@ const signupUser = async (userData) => {
             </label>
             <input
               type="password"
-              value={formData.password}
-              onChange={(e) => handleInputChange('password', e.target.value)}
-              disabled={isLoading}
+              name='password'
+              value={formik.values.password}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              disabled={formik.isSubmitting}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.password ? 'border-red-500' : 'border-gray-300'
-              } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                formik.touched.password && formik.errors.password ? 'border-red-500' : 'border-gray-300'
+              } ${formik.isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
             />
-            {errors.password && (
-              <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+            {formik.touched.password && formik.errors.password && (
+              <p className="mt-1 text-sm text-red-600">{formik.errors.password}</p>
             )}
           </div>
 
@@ -284,15 +392,17 @@ const signupUser = async (userData) => {
             </label>
             <input
               type="password"
-              value={formData.passwordConfirmation}
-              onChange={(e) => handleInputChange('passwordConfirmation', e.target.value)}
-              disabled={isLoading}
+              name ='passwordConfirmation'
+              value={formik.values.passwordConfirmation}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              disabled={formik.isSubmitting}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.passwordConfirmation ? 'border-red-500' : 'border-gray-300'
-              } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                formik.touched.passwordConfirmation && formik.errors.passwordConfirmation ? 'border-red-500' : 'border-gray-300'
+              } ${formik.isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
             />
-            {errors.passwordConfirmation && (
-              <p className="mt-1 text-sm text-red-600">{errors.passwordConfirmation}</p>
+            {formik.touched.passwordConfirmation && formik.errors.passwordConfirmation && (
+              <p className="mt-1 text-sm text-red-600">{formik.errors.passwordConfirmation}</p>
             )}
           </div>
 
@@ -301,9 +411,11 @@ const signupUser = async (userData) => {
               <div className="flex items-center space-x-3">
                 <input
                   type="checkbox"
-                  checked={captchaVerified}
-                  onChange={(e) => setCaptchaVerified(e.target.checked)}
-                  disabled={isLoading}
+                  checked={formik.values.captcha}
+                  onChange={formik.handleChange}
+                  name="captcha"
+                  onBlur ={formik.handleBlur}
+                  disabled={formik.isSubmitting}
                   className="w-6 h-6 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                 />
                 <div className="flex-1">
@@ -315,20 +427,20 @@ const signupUser = async (userData) => {
                 </div>
               </div>
             </div>
-            {errors.captcha && (
-              <p className="mt-1 text-sm text-red-600">{errors.captcha}</p>
+            {formik.touched.captchaVerified && formik.errors.captchaVerified && (
+              <p className="mt-1 text-sm text-red-600">{formik.errors.captchaVerified}</p>
             )}
           </div>
 
           <div>
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={formik.isSubmitting}
               className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                formik.isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
-              {isLoading ? 'Creating Account...' : 'Create Account'}
+              {formik.isSubmitting ? 'Creating Account...' : 'Create Account'}
             </button>
           </div>
         </form>
