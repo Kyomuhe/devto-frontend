@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { makeRequest, showToast } from '../utils/util';
-import { toast } from 'sonner';
 
 const EmailSignup = ({onSignupSuccess }) => {
   const [formData, setFormData] = useState({

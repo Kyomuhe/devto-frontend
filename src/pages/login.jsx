@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Apple, Facebook, Github, Chrome, Twitter } from 'lucide-react';
 import logo from '../assets/logo.webp';
 import { makeRequest, showToast } from '../utils/util';
-import { toast } from 'sonner';
 
 
 const LoginPage = ({ onLoginSuccess }) => {
@@ -54,7 +53,7 @@ const LoginPage = ({ onLoginSuccess }) => {
     setIsLoading(false);
   }
 };
-3
+
   const socialButtons = [
     { icon: Apple, text: 'Continue with Apple', color: 'text-gray-800' },
     { icon: Facebook, text: 'Continue with Facebook', color: 'text-blue-600' },
