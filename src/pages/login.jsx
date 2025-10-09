@@ -1,58 +1,117 @@
-import { useState } from 'react';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+// import { useState } from 'react';
 import { Apple, Facebook, Github, Chrome, Twitter } from 'lucide-react';
 import logo from '../assets/logo.webp';
 import { makeRequest, showToast } from '../utils/util';
 
 
 const LoginPage = ({ onLoginSuccess }) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
 
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setIsLoading(true);
-
-    try {
-      const details = {username, password}
-      const response = await makeRequest("auth/login", details, "Post" )
-
-      const data = response;
-
-      if (data && data.token) {
-        showToast.success('Login successful!');
-        localStorage.setItem('authToken', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        onLoginSuccess(data);
-      } 
-      else {
-      const errorMessage = data?.error || 'Login failed.';
-      setError(errorMessage);
-      showToast.error(errorMessage);
-      }
-  } catch (err) {
-    console.error("Login error:", err);
-    
-    // Checking if it's an axios error with response data
-    let errorMessage = "Something went wrong, please try again";
-    
-    if (err.response && err.response.data && err.response.data.error) {
-      // Backend returned an error message
-      errorMessage = err.response.data.error;
-    } else if (err.message) {
-      errorMessage = err.message;
+  const validationSchema = Yup.object().shape(
+    {
+      username: Yup.string()
+      .min(4, 'Username must be at least 4 characters ')
+      .required('username is required'),
+      password: Yup.string()
+      .min(8, 'Password must be at least 8 characters ')
+      .required('Password is required'),
+      rememberMe: Yup.boolean()
     }
+  );
+
+  const formik = useFormik(
+    {
+      initialValues: {
+        username: '',
+        password: '',
+        rememberMe: false
+      },
+      validationSchema: validationSchema,
+      onSubmit: async (values, {setSubmitting, setFieldError}) =>{
+        try{
+          const details = { username: values.username, password: values.password}
+          const response = await makeRequest("auth/login", details, "Post");
+          const data = response;
+
+          if (data && data.token) {
+            showToast.success('login sucessful!');
+            localStorage.setItem('authToken', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            onLoginSuccess(data);
+          }else{
+            const errorMessage = data?.error || 'Login failed.';
+            setFieldError('general', errorMessage);
+            showToast.error(errorMessage);
+          }
+        }catch(err){
+          console.error("Login error:", err);
+          let errorMessage = "Something went wrong, please try again";
+          
+          if (err.response && err.response.data && err.response.data.error) {
+            errorMessage = err.response.data.error;
+          } else if (err.message) {
+            errorMessage = err.message;
+          }
+          
+          setFieldError('general', errorMessage);
+          showToast.error(errorMessage);
+
+
+        }finally{
+          setSubmitting(false);
+        }
+      }
+    }
+  )
+//   const [username, setUsername] = useState('');
+//   const [password, setPassword] = useState('');
+//   const [rememberMe, setRememberMe] = useState(false);
+//   const [error, setError] = useState('');
+//   const [isLoading, setIsLoading] = useState(false);
+
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     setError('');
+//     setIsLoading(true);
+
+//     try {
+//       const details = {username, password}
+//       const response = await makeRequest("auth/login", details, "Post" )
+
+//       const data = response;
+
+//       if (data && data.token) {
+//         showToast.success('Login successful!');
+//         localStorage.setItem('authToken', data.token);
+//         localStorage.setItem('user', JSON.stringify(data.user));
+//         onLoginSuccess(data);
+//       } 
+//       else {
+//       const errorMessage = data?.error || 'Login failed.';
+//       setError(errorMessage);
+//       showToast.error(errorMessage);
+//       }
+//   } catch (err) {
+//     console.error("Login error:", err);
     
-    setError(errorMessage);
-    showToast.error(errorMessage);
-  } finally {
-    setIsLoading(false);
-  }
-};
+//     // Checking if it's an axios error with response data
+//     let errorMessage = "Something went wrong, please try again";
+    
+//     if (err.response && err.response.data && err.response.data.error) {
+//       // Backend returned an error message
+//       errorMessage = err.response.data.error;
+//     } else if (err.message) {
+//       errorMessage = err.message;
+//     }
+    
+//     setError(errorMessage);
+//     showToast.error(errorMessage);
+//   } finally {
+//     setIsLoading(false);
+//   }
+// };
 
   const socialButtons = [
     { icon: Apple, text: 'Continue with Apple', color: 'text-gray-800' },
@@ -72,9 +131,9 @@ const LoginPage = ({ onLoginSuccess }) => {
         </div>
 
         {/* Show error */}
-        {error && (
+        {formik.errors.general && (
           <div className="text-red-600 text-sm font-medium text-center">
-            {error} 
+            {formik.errors.general} 
           </div>
         )}
 
@@ -106,7 +165,7 @@ const LoginPage = ({ onLoginSuccess }) => {
         </div>
 
         {/* Login form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={formik.handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
               Username
@@ -114,12 +173,21 @@ const LoginPage = ({ onLoginSuccess }) => {
             <input
               id="username"
               type="text"
-              required
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={formik.values.username}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              name="username"
+              className={`w-full px-3 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                formik.touched.username && formik.errors.username
+                  ? 'border-red-500'
+                  : 'border-gray-300'
+              }`}
+
               placeholder="Enter your username"
             />
+            {formik.touched.username && formik.errors.username && (
+              <p className="mt-1 text-sm text-red-600">{formik.errors.username}</p>
+            )}
           </div>
 
           <div>
@@ -129,12 +197,20 @@ const LoginPage = ({ onLoginSuccess }) => {
             <input
               id="password"
               type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={formik.values.password}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              name="password"
+              className={`w-full px-3 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                formik.touched.password && formik.errors.password
+                  ? 'border-red-500'
+                  : 'border-gray-300'
+              }`}
               placeholder="Enter your password"
             />
+            {formik.touched.password && formik.errors.password && (
+              <p className="mt-1 text-sm text-red-600">{formik.errors.password}</p>
+            )}
           </div>
 
           <div className="flex items-center justify-between">
@@ -142,8 +218,9 @@ const LoginPage = ({ onLoginSuccess }) => {
               <input
                 id="remember-me"
                 type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
+                checked={formik.values.rememberMe}
+                onChange={formik.handleChange}
+                name="rememberMe"
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
               <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
@@ -157,9 +234,10 @@ const LoginPage = ({ onLoginSuccess }) => {
 
           <button
             type="submit"
+            disabled={formik.isSubmitting}
             className="w-full flex justify-center py-3 px-4 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
-            Log in
+            {formik.isSubmitting ? 'Logging in...' : 'Login in'}
           </button>
         </form>
       </div>
