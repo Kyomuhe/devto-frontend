@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Check } from 'lucide-react';
+import useSignupStore from '../../store/storage';
+
 
 const InterestsSelection = ({ onContinue, onBack, currentStep = 2, totalSteps = 5 }) => {
+  const data = useSignupStore((state) => state.signupData)
+  const updateSignupData = useSignupStore((state) => state.updateSignupData)
+  console.log(data)
   const [selectedTags, setSelectedTags] = useState(['javascript', 'beginners', 'react']);
 
   const availableTags = [
@@ -30,6 +35,8 @@ const InterestsSelection = ({ onContinue, onBack, currentStep = 2, totalSteps = 
   };
 
   const handleContinue = () => {
+
+    updateSignupData({"selectedTags": selectedTags})
     onContinue({ selectedTags });
   };
 

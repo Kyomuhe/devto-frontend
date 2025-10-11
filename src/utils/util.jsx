@@ -50,18 +50,36 @@ export const makeRequest = async (endpoint, data, method) => {
 }
 
 //toast
-export const showToast = {
-    success: (message) => {
-        toast.success(message, {
-            duration: 4000,
-            style: {background: '#22c55e', color: '#fff'}
-        });
-    },
+// export const showToast = {
+//     success: (message) => {
+//         toast.success(message, {
+//             duration: 4000,
+//             style: {background: '#22c55e', color: '#fff'}
+//         });
+//     },
 
-    error: (message) =>{
-        toast.error(message, {
-            duration: 4000,
-            style: {background: '#ef4444', color: '#fff'}
-        })
+//     error: (message) =>{
+//         toast.error(message, {
+//             duration: 4000,
+//             style: {background: '#ef4444', color: '#fff'}
+//         })
+//     }
+// }
+
+export const showToast = (message, type) => {
+    switch(type){
+        case 'success':
+            return toast.success(message, {
+                duration: 4000,
+                style: {background: '#22c55e', color: '#fff'}
+            });
+        case 'error':
+            return toast.error(message, {
+                duration: 4000,
+                style: {background: '#ef4444', color: '#fff'}
+            });
+        default:
+            return toast(message);
     }
 }
+

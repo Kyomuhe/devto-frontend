@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
+import useSignupStore from '../../store/storage';
 
 const SpecialInitiatives = ({ onContinue, onBack, currentStep = 3, totalSteps = 5 }) => {
+  const data = useSignupStore((state) => state.signupData)
+  console.log(data)
   const [selectedInitiatives, setSelectedInitiatives] = useState([]);
 
   const initiatives = [
@@ -33,6 +36,7 @@ const SpecialInitiatives = ({ onContinue, onBack, currentStep = 3, totalSteps = 
   };
 
   const handleContinue = () => {
+    updateSignupData({selectedInitiatives})
     onContinue({ selectedInitiatives });
   };
 

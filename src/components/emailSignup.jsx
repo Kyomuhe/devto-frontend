@@ -26,7 +26,7 @@ const EmailSignup = ({onSignupSuccess }) => {
       .oneOf([Yup.ref('password'), null], 'Passwords must match')
       .required('Password confirmation is required'),
       profileImage: Yup.mixed()
-      .nullable(),
+      .notRequired(),
       captcha: Yup.boolean()
       .oneOf([true], 'Please verify that you are not a robot')
       .required('Captcha verification is required') 
@@ -37,7 +37,7 @@ const EmailSignup = ({onSignupSuccess }) => {
   const formik = useFormik(
     {
       initialValues:{
-        profileImage: null,
+        profileImage: '',
         name: '',
         username: '',
         email: '',
@@ -65,7 +65,7 @@ const EmailSignup = ({onSignupSuccess }) => {
           const data = await makeRequest('auth/signup', userData, 'Post');
 
           if (data && data.token){
-            showToast.success('Signup successful!');
+            showToast('Signup successful!', 'success');
             localStorage.setItem("authtoken", data.token)
             localStorage.setItem("user", JSON.stringify(data.user))
             if (onSignupSuccess){
@@ -77,29 +77,12 @@ const EmailSignup = ({onSignupSuccess }) => {
         }catch (error){
           const errorMessage = error.response?.data?.error || error.message || 'signup failed';
           setFieldError('general', errorMessage);
-          showToast.error(errorMessage);
+          showToast(errorMessage, 'error');
         }finally {
           setSubmitting(false);
         }
     }
 });
-
-//   function getBase64(file) {
-//     let base64String = '';
-//    var reader = new FileReader();
-
-//    reader.readAsDataURL(file);
-//    reader.onload = function () {
-//     base64String = reader.result.split(",")[1]
-//     setImage(base64String)
-//      console.log(base64String);
-
-//    };   
-//    reader.onerror = function (error) {
-//      console.log('Error: ', error);
-//    };
-//    return base64String;
-// }
 
   const getBase64 = (file) => {
     return new Promise((resolve, reject) => {

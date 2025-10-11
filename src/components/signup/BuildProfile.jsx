@@ -1,14 +1,10 @@
 import React, { useState } from 'react';
 import { Camera } from 'lucide-react';
+import useSignupStore from '../../store/storage';
 
 const BuildProfile = ({ onContinue, currentStep = 1, totalSteps = 5 }) => {
-  // Dummy user data 
-  const [userData, setUserData] = useState({
-    name: 'KYOMUHENDO PRECIOUS',
-    username: 'precious_kay',
-    bio: '',
-    profileImage: '/assets/profile1.jpeg'
-  });
+  const updateSignupData = useSignupStore((state) => state.updateSignupData);
+  const [userData, setUserData] = useState({});
 
   const handleInputChange = (field, value) => {
     setUserData(prev => ({
@@ -18,6 +14,7 @@ const BuildProfile = ({ onContinue, currentStep = 1, totalSteps = 5 }) => {
   };
 
   const handleContinue = () => {
+    updateSignupData(userData);
     // Passing user data to parent component
     onContinue(userData);
   };
@@ -43,7 +40,7 @@ const BuildProfile = ({ onContinue, currentStep = 1, totalSteps = 5 }) => {
         <div className="flex items-center space-x-4 mb-8">
           <div className="relative">
             <img
-              src={userData.profileImage}
+              src={userData.profileImage || ''}
               alt="Profile"
               className="w-20 h-20 rounded-full object-cover border-4 border-gray-200"
             />

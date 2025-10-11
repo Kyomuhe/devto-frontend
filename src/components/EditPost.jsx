@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import CreatePost from '../models/CreatePost';
+import { makeRequest } from '../utils/util';
 
 const EditPost = ({ user }) => {
   const { postId } = useParams();
@@ -18,13 +19,13 @@ const EditPost = ({ user }) => {
   const fetchPostData = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:8081/posts/${postId}`);
+      const response = await makeRequest(`posts/${postId}`, {}, 'Get');
       
-      if (!response.ok) {
-        throw new Error('Failed to fetch post data');
-      }
+      // if (!response.ok) {
+      //   throw new Error('Failed to fetch post data');
+      // }
       
-      const post = await response.json();
+      const post = response
       
       // Verifying that the user owns this post
       if (post.user.id !== user.id) {

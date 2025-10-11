@@ -3,9 +3,12 @@ import { ArrowLeft } from 'lucide-react';
 import signup from '../../assets/signup.png';
 
 const NewsletterSubscription = ({ onFinish, onBack, currentStep = 4, totalSteps = 5 }) => {
+  const data = useSignupStore((state) => state.signupData)
+  console.log(data)
   const [subscribeToNewsletter, setSubscribeToNewsletter] = useState(true);
 
   const handleFinish = () => {
+    udateSignupData({subscribeToNewsletter})
     onFinish({ subscribeToNewsletter });
   };
 

@@ -35,14 +35,14 @@ const LoginPage = ({ onLoginSuccess }) => {
           const data = response;
 
           if (data && data.token) {
-            showToast.success('login sucessful!');
+            showToast('login sucessful!','success' );
             localStorage.setItem('authToken', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
             onLoginSuccess(data);
           }else{
             const errorMessage = data?.error || 'Login failed.';
             setFieldError('general', errorMessage);
-            showToast.error(errorMessage);
+            showToast(errorMessage, 'error');
           }
         }catch(err){
           console.error("Login error:", err);
@@ -55,7 +55,7 @@ const LoginPage = ({ onLoginSuccess }) => {
           }
           
           setFieldError('general', errorMessage);
-          showToast.error(errorMessage);
+          showToast(errorMessage, 'error');
 
 
         }finally{
